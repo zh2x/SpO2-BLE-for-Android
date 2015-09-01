@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">SpO2_BLE</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="turn_on_bluetooth">Turn On Bluetooth</string>
+    <string name="turn_off_bluetooth">Turn Off Bluetooth</string>
+    <string name="search_oximeters">Search Oximeters</string>
+    <string name="str_device_name">Device Name</string>
+    <string name="str_firmware_version">Firmware Version</string>
+    <string name="str_bluetooth_version">Bluetooth Version</string>
+    <string name="str_notify">Notify</string>
+    <string name="str_bluetooth_name">Bluetooth Name:</string>
+    <string name="str_berry_med">BerryMed</string>
+</resources>

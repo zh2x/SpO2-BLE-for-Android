@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -48,7 +49,6 @@ public class MainActivity extends AppCompatActivity implements OxiProtocolRunnab
     private BluetoothDevice    mTargetDevice;
     private BluetoothLeService mBluetoothLeService;
 
-    private BluetoothGattCharacteristic chBluetoothVer;
     private BluetoothGattCharacteristic chReceive;
 
     private boolean mIsNotified;
@@ -88,6 +88,13 @@ public class MainActivity extends AppCompatActivity implements OxiProtocolRunnab
         WaveFormParams mSpO2WaveParas = new WaveFormParams(3,2,new int[]{0,100});
         mSpO2WaveDraw = new WaveForm(this, sfvSpO2,mSpO2WaveParas);
 
+        TextView tvGetSource = (TextView) findViewById(R.id.tvGetSource);
+        tvGetSource.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(Const.GITHUB_SITE)));
+            }
+        });
     }
 
     private Handler mHandler = new Handler()
@@ -289,10 +296,6 @@ public class MainActivity extends AppCompatActivity implements OxiProtocolRunnab
                 scanLeDevice(true);
                 tvStatusBar.setText("Searching...");
                 break;
-            case R.id.btnBluetoothVersion:
-                if(chBluetoothVer != null)
-                    mBluetoothLeService.readCharacteristic(chBluetoothVer);
-                break;
             case R.id.btnNotify:
                 if(chReceive != null)
                 {
@@ -306,12 +309,14 @@ public class MainActivity extends AppCompatActivity implements OxiProtocolRunnab
                     else
                     {
                         mBluetoothLeService.setCharacteristicNotification(chReceive,false);
-                        mOxiProtocolRunnable.stop();
+                        if(mOxiProtocolRunnable != null)
+                        {
+                            mOxiProtocolRunnable.stop();
+                        }
                         Log.i(TAG,">>>>>>>>>>>>>>>>>>>>STOP<<<<<<<<<<<<<<<<<<<");
                     }
                     mIsNotified = !mIsNotified;
                 }
-
         }
     }
 
@@ -323,11 +328,7 @@ public class MainActivity extends AppCompatActivity implements OxiProtocolRunnab
         BluetoothGattService mDataService = null;
         for(BluetoothGattService service : services)
         {
-            if(service.getUuid().equals(Const.UUID_SERVICE_INFO))
-            {
-                mInfoService = service;
-            }
-            else if(service.getUuid().equals(Const.UUID_SERVICE_DATA))
+            if(service.getUuid().equals(Const.UUID_SERVICE_DATA))
             {
                 mDataService = service;
             }
@@ -341,20 +342,6 @@ public class MainActivity extends AppCompatActivity implements OxiProtocolRunnab
                 if(ch.getUuid().equals(Const.UUID_CHARACTER_RECEIVE))
                 {
                     chReceive = ch;
-                }
-            }
-        }
-
-        if(mInfoService != null)
-        {
-            List<BluetoothGattCharacteristic> characteristics =
-                    mInfoService.getCharacteristics();
-
-            for(BluetoothGattCharacteristic ch: characteristics)
-            {
-                if(ch.getUuid().equals(Const.UUID_CHARACTER_BLUETOOTH_VER))
-                {
-                    chBluetoothVer = ch;
                 }
             }
         }

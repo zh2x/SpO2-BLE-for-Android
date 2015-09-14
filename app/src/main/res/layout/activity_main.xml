@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -6,6 +6,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -73,14 +74,6 @@
         android:layout_below="@id/tvStatusBar"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btnBluetoothVersion"
-            android:onClick="onClick"
-            android:text="@string/str_bluetooth_version"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAllCaps="false"
-            android:layout_weight="1"/>
 
         <Button
             android:id="@+id/btnNotify"
@@ -88,28 +81,40 @@
             android:text="@string/str_notify"
             android:layout_width="match_parent"
             android:textAllCaps="false"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/btnBluetoothVersion"/>
-
-        <View
-            android:layout_width="wrap_content"
-            android:layout_height="20dp"/>
+            android:layout_height="wrap_content"/>
     </LinearLayout>
-
-    <SurfaceView
-        android:id="@+id/sfvSpO2"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_weight="1"
-        android:background="@color/app_background_color"
-        android:layout_alignParentBottom="true"/>
 
     <TextView
         android:id="@+id/tvParamsBar"
         android:padding="10dp"
         android:gravity="center"
+        android:textColor="@android:color/black"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <SurfaceView
+        android:id="@+id/sfvSpO2"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="@color/app_background_color"
+        android:layout_alignParentBottom="true"/>
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/sfvSpO2"/>
+        android:layout_weight="1"
+        android:gravity="bottom">
+        <TextView
+            android:id="@+id/tvGetSource"
+            android:onClick="onClick"
+            android:padding="10dp"
+            android:gravity="right"
+            android:text="@string/str_get_source_code"
+            android:textColor="@android:color/holo_blue_dark"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+    </RelativeLayout>
 
-</RelativeLayout>
+
+</LinearLayout>

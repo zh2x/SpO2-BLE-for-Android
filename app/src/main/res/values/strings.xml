@@ -13,4 +13,5 @@
     <string name="str_notify">Notify</string>
     <string name="str_bluetooth_name">Bluetooth Name:</string>
     <string name="str_berry_med">BerryMed</string>
+    <string name="str_get_source_code"><u>Get Source Code>>></u></string>
 </resources>

@@ -70,7 +70,7 @@ public class OxiProtocolRunnable implements Runnable
                 }
 
                 // want more info such as status or parameters read the manual paper
-                // https://github.com/doe-cn/BCI_Protocol_Demo/tree/master/protocol_manual
+                // https://github.com/zh2x/BCI_Protocol_Demo/tree/master/protocol_manual
                 spo2      = parseBuf[4];
                 pulseRate = parseBuf[3] | ((parseBuf[2] & 0x40) << 1);
                 pi        = parseBuf[0] & 0x0f;

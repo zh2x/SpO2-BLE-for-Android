@@ -31,18 +31,20 @@ import com.berry_med.waveform.WaveFormParams;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements OxiProtocolRunnable.OnDataChangeListener{
+public class MainActivity extends AppCompatActivity implements ProtocolRunnable.OnDataChangeListener{
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
     private static final long SCAN_PERIOD = 3000;
 
     private LinearLayout rlInfoBtns;
+    private LinearLayout llModifyBtName;
     private Button btnBluetoothToggle;
     private Button btnSearchOximeters;
     private TextView tvStatusBar;
     private TextView tvParamsBar;
     private EditText edBluetoothName;
+    private EditText edNewBtName;
 
 
     private BluetoothAdapter   mBluetoothAdapter;
@@ -50,11 +52,13 @@ public class MainActivity extends AppCompatActivity implements OxiProtocolRunnab
     private BluetoothLeService mBluetoothLeService;
 
     private BluetoothGattCharacteristic chReceive;
+    private BluetoothGattCharacteristic chChangeBtName;
+
 
     private boolean mIsNotified;
     private boolean mIsScanFinished;
 
-    private OxiProtocolRunnable mOxiProtocolRunnable;
+    private ProtocolRunnable mProtocolRunnable;
     private WaveForm mSpO2WaveDraw;
 
     private String strTargetBluetoothName = "BerryMed";
@@ -71,6 +75,9 @@ public class MainActivity extends AppCompatActivity implements OxiProtocolRunnab
         tvStatusBar        = (TextView) findViewById(R.id.tvStatusBar);
         tvParamsBar        = (TextView) findViewById(R.id.tvParamsBar);
         rlInfoBtns         = (LinearLayout) findViewById(R.id.rlInfoBtns);
+        llModifyBtName     = (LinearLayout) findViewById(R.id.llModifyBtName);
+        edNewBtName        = (EditText) findViewById(R.id.etNewBtName);
+
         rlInfoBtns.setVisibility(View.GONE);
 
         //init bluetooth adapter
@@ -224,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements OxiProtocolRunnab
             final String action = intent.getAction();
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
                 Toast.makeText(MainActivity.this, "Connected",Toast.LENGTH_SHORT).show();
-
+                mIsNotified = false;
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
                 Toast.makeText(MainActivity.this, "Disconnected",Toast.LENGTH_SHORT).show();
                 unbindService(mServiceConnection);
@@ -242,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements OxiProtocolRunnab
                                Toast.LENGTH_SHORT).show();
             }
             else if (BluetoothLeService.ACTION_SPO2_DATA_AVAILABLE.equals(action)) {
-                mOxiProtocolRunnable.add(intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA));
+                mProtocolRunnable.add(intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA));
             }
         }
     };
@@ -301,22 +308,27 @@ public class MainActivity extends AppCompatActivity implements OxiProtocolRunnab
                 {
                     if(!mIsNotified)
                     {
-                        mOxiProtocolRunnable = new OxiProtocolRunnable(MainActivity.this);
-                        new Thread(mOxiProtocolRunnable).start();
+                        mProtocolRunnable = new ProtocolRunnable(MainActivity.this);
+                        new Thread(mProtocolRunnable).start();
                         mBluetoothLeService.setCharacteristicNotification(chReceive,true);
                         Log.i(TAG,">>>>>>>>>>>>>>>>>>>>START<<<<<<<<<<<<<<<<<<<");
                     }
                     else
                     {
                         mBluetoothLeService.setCharacteristicNotification(chReceive,false);
-                        if(mOxiProtocolRunnable != null)
+                        if(mProtocolRunnable != null)
                         {
-                            mOxiProtocolRunnable.stop();
+                            mProtocolRunnable.stop();
                         }
                         Log.i(TAG,">>>>>>>>>>>>>>>>>>>>STOP<<<<<<<<<<<<<<<<<<<");
                     }
                     mIsNotified = !mIsNotified;
                 }
+                break;
+            case R.id.btnModifyBtName:
+                String btName = edNewBtName.getText().toString();
+                ProtocolRunnable.modifyBluetoothName(mBluetoothLeService, chChangeBtName, btName);
+                break;
         }
     }
 
@@ -343,13 +355,18 @@ public class MainActivity extends AppCompatActivity implements OxiProtocolRunnab
                 {
                     chReceive = ch;
                 }
+                else if(ch.getUuid().equals(Const.UUID_MODIFY_BT_NAME))
+                {
+                    chChangeBtName = ch;
+                    llModifyBtName.setVisibility(View.VISIBLE);
+                }
             }
         }
     }
 
     @Override
     public void onSpO2ParamsChanged() {
-        OxiProtocolRunnable.SpO2Params params = mOxiProtocolRunnable.getSpO2Params();
+        ProtocolRunnable.OxiParams params = mProtocolRunnable.getOxiParams();
         mHandler.obtainMessage(Const.MESSAGE_OXIMETER_PARAMS,params.getSpo2(),params.getPulseRate()).sendToTarget();
     }
 

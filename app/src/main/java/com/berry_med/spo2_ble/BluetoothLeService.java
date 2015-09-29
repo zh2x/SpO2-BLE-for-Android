@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ *
+ * This file is provide by Google. I do modify some code to adopt This demo Project.
+ *
+ */
 package com.berry_med.spo2_ble;
 
 import android.app.Service;
@@ -32,9 +37,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
@@ -66,8 +69,12 @@ public class BluetoothLeService extends Service {
     public final static String EXTRA_DATA =
             "com.example.bluetooth.le.EXTRA_DATA";
 
+    private final static int TRANSFER_PACKAGE_SIZE = 10;
+
     private byte[] buf = new byte[10];
     private int bufIndex = 0;
+
+
 
     //public final static UUID UUID_HEART_RATE_MEASUREMENT =
     //        UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
@@ -139,7 +146,7 @@ public class BluetoothLeService extends Service {
             {
                 buf[bufIndex] = b;
                 bufIndex++;
-                if(bufIndex == 10)
+                if(bufIndex == buf.length)
                 {
                     intent.putExtra(EXTRA_DATA,buf);
                     sendBroadcast(intent);
@@ -320,5 +327,35 @@ public class BluetoothLeService extends Service {
         if (mBluetoothGatt == null) return null;
 
         return mBluetoothGatt.getServices();
+    }
+
+
+    /**
+     * Split the package into small pieces to transfer.
+     * @param ch
+     * @param bytes
+     */
+    public void write(BluetoothGattCharacteristic ch, byte[] bytes)
+    {
+        int byteOffset = 0;
+        while(bytes.length - byteOffset > TRANSFER_PACKAGE_SIZE)
+        {
+            byte[] b = new byte[TRANSFER_PACKAGE_SIZE];
+            System.arraycopy(bytes,byteOffset,b,0, TRANSFER_PACKAGE_SIZE);
+
+            ch.setValue(b);
+            mBluetoothGatt.writeCharacteristic(ch);
+
+            byteOffset += TRANSFER_PACKAGE_SIZE;
+        }
+
+        if(bytes.length - byteOffset != 0)
+        {
+            byte[] b = new byte[bytes.length - byteOffset];
+            System.arraycopy(bytes,byteOffset,b,0,bytes.length - byteOffset);
+
+            ch.setValue(b);
+            mBluetoothGatt.writeCharacteristic(ch);
+        }
     }
 }

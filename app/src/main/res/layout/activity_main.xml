@@ -99,6 +99,29 @@
         android:background="@color/app_background_color"
         android:layout_alignParentBottom="true"/>
 
+    <LinearLayout
+        android:id="@+id/llModifyBtName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:padding="5dp"
+        android:orientation="horizontal">
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/etNewBtName"
+            android:hint="@string/strHintModifyName"
+            android:gravity="center"
+            android:layout_weight="2"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:text="@string/strModify"
+            android:id="@+id/btnModifyBtName"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -115,6 +138,7 @@
             android:layout_height="wrap_content"
             />
     </RelativeLayout>
+
 
 
 </LinearLayout>

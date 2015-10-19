@@ -312,7 +312,10 @@ public class BluetoothLeService extends Service {
         // This is specific to Oximeter Data Transfer.
         if (Const.UUID_CHARACTER_RECEIVE.equals(characteristic.getUuid())) {
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(Const.UUID_CLIENT_CHARACTER_CONFIG);
-            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+            if(enabled)
+                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+            else
+                descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
             mBluetoothGatt.writeDescriptor(descriptor);
         }
     }

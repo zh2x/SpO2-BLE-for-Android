@@ -16,5 +16,5 @@ public class Const {
     public static final int  MESSAGE_OXIMETER_PARAMS            = 2003;
     public static final int  MESSAGE_OXIMETER_WAVE              = 2004;
 
-    public static final String GITHUB_SITE                      = "https://github.com/zh2x/SpO2_BLE";
+    public static final String GITHUB_SITE                      = "https://github.com/zh2x/SpO2-BLE-for-Android";
 }

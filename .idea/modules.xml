@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SpO2_BLE.iml" filepath="$PROJECT_DIR$/SpO2_BLE.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spo2-ble-for-android.iml" filepath="$PROJECT_DIR$/spo2-ble-for-android.iml" />
     </modules>
   </component>
 </project>

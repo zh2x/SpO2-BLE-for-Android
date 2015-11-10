@@ -1,5 +1,9 @@
-# SpO2_BLE
-A simple demo for the new Oximeter which with 4.0BLE inside.   Any issues: doe_cn@qq.com
+###SpO2-BLE-for-Android
+a sample demo for Berry Medical's Oximeter which have Bluetooth Low Energy inside.
 
-###Not all Oximeters support rename the Bluetooth.
+###Protocol Manual
+<https://github.com/zh2x/BCI_Protocol_Demo>
+
+###More Details or Questions.
+send an email to <doe_cn@qq.com>
 

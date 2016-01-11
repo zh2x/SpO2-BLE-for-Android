@@ -26,12 +26,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.berry_med.OximeterData.DataParser;
+import com.berry_med.OximeterData.PackageParser;
 import com.berry_med.waveform.WaveForm;
 import com.berry_med.waveform.WaveFormParams;
 
+import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements ProtocolRunnable.OnDataChangeListener{
+public class MainActivity extends AppCompatActivity implements PackageParser.OnDataChangeListener{
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
@@ -58,10 +61,12 @@ public class MainActivity extends AppCompatActivity implements ProtocolRunnable.
     private boolean mIsNotified;
     private boolean mIsScanFinished;
 
-    private ProtocolRunnable mProtocolRunnable;
+    private DataParser mDataParser;
+    private PackageParser mPackageParser;
     private WaveForm mSpO2WaveDraw;
 
     private String strTargetBluetoothName = "BerryMed";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +107,23 @@ public class MainActivity extends AppCompatActivity implements ProtocolRunnable.
                 startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(Const.GITHUB_SITE)));
             }
         });
+
+        //******************************** package parse******************************
+        mDataParser = new DataParser(DataParser.Protocol.BCI, new DataParser.onPackageReceivedListener() {
+            @Override
+            public void onPackageReceived(int[] dat) {
+                Log.i(TAG, "onPackageReceived: " + Arrays.toString(dat));
+                if(mPackageParser == null) {
+                    mPackageParser = new PackageParser(MainActivity.this);
+                }
+
+                mPackageParser.parse(dat);
+            }
+        });
+
+        mDataParser.start();
+        //*******************************************************************************
+
     }
 
     private Handler mHandler = new Handler()
@@ -142,6 +164,8 @@ public class MainActivity extends AppCompatActivity implements ProtocolRunnable.
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        mDataParser.stop();
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
     }
@@ -249,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements ProtocolRunnable.
                                Toast.LENGTH_SHORT).show();
             }
             else if (BluetoothLeService.ACTION_SPO2_DATA_AVAILABLE.equals(action)) {
-                mProtocolRunnable.add(intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA));
+                mDataParser.add(intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA));
             }
         }
     };
@@ -308,18 +332,12 @@ public class MainActivity extends AppCompatActivity implements ProtocolRunnable.
                 {
                     if(!mIsNotified)
                     {
-                        mProtocolRunnable = new ProtocolRunnable(MainActivity.this);
-                        new Thread(mProtocolRunnable).start();
                         mBluetoothLeService.setCharacteristicNotification(chReceive,true);
                         Log.i(TAG,">>>>>>>>>>>>>>>>>>>>START<<<<<<<<<<<<<<<<<<<");
                     }
                     else
                     {
                         mBluetoothLeService.setCharacteristicNotification(chReceive,false);
-                        if(mProtocolRunnable != null)
-                        {
-                            mProtocolRunnable.stop();
-                        }
                         Log.i(TAG,">>>>>>>>>>>>>>>>>>>>STOP<<<<<<<<<<<<<<<<<<<");
                     }
                     mIsNotified = !mIsNotified;
@@ -327,7 +345,7 @@ public class MainActivity extends AppCompatActivity implements ProtocolRunnable.
                 break;
             case R.id.btnModifyBtName:
                 String btName = edNewBtName.getText().toString();
-                ProtocolRunnable.modifyBluetoothName(mBluetoothLeService, chChangeBtName, btName);
+                PackageParser.modifyBluetoothName(mBluetoothLeService, chChangeBtName, btName);
                 break;
         }
     }
@@ -366,7 +384,7 @@ public class MainActivity extends AppCompatActivity implements ProtocolRunnable.
 
     @Override
     public void onSpO2ParamsChanged() {
-        ProtocolRunnable.OxiParams params = mProtocolRunnable.getOxiParams();
+        PackageParser.OxiParams params = mPackageParser.getOxiParams();
         mHandler.obtainMessage(Const.MESSAGE_OXIMETER_PARAMS,params.getSpo2(),params.getPulseRate()).sendToTarget();
     }
 

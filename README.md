@@ -1,4 +1,4 @@
-![demo](C:\Users\ZXX\Desktop\SpO2-BLE-for-Android\demo.gif)
+![demo](demo.gif)
 
 
 

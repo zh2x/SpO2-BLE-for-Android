@@ -1,4 +1,4 @@
-package com.berry_med.spo2_ble;
+package com.berry_med.spo2_ble.data;
 
 import java.util.UUID;
 
@@ -12,9 +12,6 @@ public class Const {
     public static final UUID       UUID_MODIFY_BT_NAME          = UUID.fromString("00005343-0000-1000-8000-00805F9B34FB");
 
     public static final UUID UUID_CLIENT_CHARACTER_CONFIG       = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
-
-    public static final int  MESSAGE_OXIMETER_PARAMS            = 2003;
-    public static final int  MESSAGE_OXIMETER_WAVE              = 2004;
 
     public static final String GITHUB_SITE                      = "https://github.com/zh2x/SpO2-BLE-for-Android";
 }

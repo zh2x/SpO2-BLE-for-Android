@@ -19,7 +19,7 @@
  * This file is provide by Google. I do modify some code to adopt This demo Project.
  *
  */
-package com.berry_med.spo2_ble;
+package com.berry_med.spo2_ble.ble;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -36,6 +36,8 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+
+import com.berry_med.spo2_ble.data.Const;
 
 import java.util.List;
 

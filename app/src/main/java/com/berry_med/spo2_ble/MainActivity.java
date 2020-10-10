@@ -1,10 +1,16 @@
 package com.berry_med.spo2_ble;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,14 +34,22 @@ public class MainActivity extends AppCompatActivity implements BleController.Sta
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
-    @BindView(R.id.btnSearch) Button btnSearch;
-    @BindView(R.id.tvStatus)  TextView tvStatus;
-    @BindView(R.id.tvParams)  TextView tvResult;
-    @BindView(R.id.wfvPleth)   WaveformView wfvPleth;
-    @BindView(R.id.etNewBtName) EditText etNewBtName;
-    @BindView(R.id.llChangeName) LinearLayout llChangeName;
+    private static final int PERMISSION_REQUEST_CODE_LOCATION = 100;
 
-    private DataParser    mDataParser;
+    @BindView(R.id.btnSearch)
+    Button btnSearch;
+    @BindView(R.id.tvStatus)
+    TextView tvStatus;
+    @BindView(R.id.tvParams)
+    TextView tvResult;
+    @BindView(R.id.wfvPleth)
+    WaveformView wfvPleth;
+    @BindView(R.id.etNewBtName)
+    EditText etNewBtName;
+    @BindView(R.id.llChangeName)
+    LinearLayout llChangeName;
+
+    private DataParser mDataParser;
     private BleController mBleControl;
 
     private SearchDevicesDialog mSearchDialog;
@@ -92,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements BleController.Sta
                 dismiss();
             }
         };
+        checkLocationPermission();
     }
 
     @Override
@@ -138,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements BleController.Sta
 
     @Override
     public void onFoundDevice(final BluetoothDevice device) {
-        if(!mBtDevices.contains(device)){
+        if((!mBtDevices.contains(device))  &&  (device.getName() != null)){
             mBtDevices.add(device);
             mBtDevicesAdapter.notifyDataSetChanged();
         }
@@ -169,5 +184,40 @@ public class MainActivity extends AppCompatActivity implements BleController.Sta
     @Override
     public void onScanStop() {
         mSearchDialog.stopSearch();
+    }
+
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private void checkLocationPermission(){
+        if((checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+                || (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)){
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE_LOCATION);
+            btnSearch.setEnabled(false);
+        }
+        else{
+            btnSearch.setEnabled(true);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        boolean isGrantedLocation = true;
+        if(requestCode == PERMISSION_REQUEST_CODE_LOCATION){
+            for(int i : grantResults){
+                if(i != PackageManager.PERMISSION_GRANTED){
+                    isGrantedLocation = false;
+                }
+            }
+        }
+        if(!isGrantedLocation){
+            tvStatus.setText("ERR: No location permissions.");
+            Toast.makeText(this,"Permission Error !!!",Toast.LENGTH_SHORT).show();
+            btnSearch.setEnabled(false);
+        }
+        else{
+            btnSearch.setEnabled(true);
+        }
     }
 }

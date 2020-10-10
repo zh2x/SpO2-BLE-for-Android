@@ -1,8 +1,5 @@
 <resources>
-    <string name="app_name">SPO2-BLE</string>
-
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="app_name">SpO2 BLE</string>
 
     <string name="turn_on_bluetooth">Turn On Bluetooth</string>
     <string name="turn_off_bluetooth">Turn Off Bluetooth</string>

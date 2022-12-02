@@ -1,99 +1,115 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
-    tools:context=".views.MainActivity">
-
-    <LinearLayout
-        android:id="@+id/llBtns"
-        android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/btnSearch"
-            android:onClick="onClick"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:textAllCaps="false"
-            android:textSize="18sp"
-            android:text="@string/search_oximeters"/>
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/tvStatus"
-        android:padding="10dp"
-        android:textSize="18sp"
-        android:text="____"
-        android:gravity="center"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/llBtns"/>
-
-
-    <TextView
-        android:id="@+id/tvParams"
-        android:padding="10dp"
-        android:gravity="center"
-        android:textSize="24sp"
-        android:textColor="@android:color/black"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <com.berry_med.spo2_ble.views.WaveformView
-        android:id="@+id/wfvPleth"
-        android:layout_width="match_parent"
-        android:layout_margin="8dp"
-        android:layout_height="200dp"/>
-
-
-    <LinearLayout
-        android:id="@+id/llChangeName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:visibility="gone"
-        android:orientation="horizontal">
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/etNewBtName"
-            android:gravity="center"
-            android:layout_weight="1"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onClick"
-            android:text="@string/strChangeName"
-            android:id="@+id/btnChangeName"
-            android:textAllCaps="false"/>
-    </LinearLayout>
+    tools:context=".MainActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1">
-        <TextView
-            android:id="@+id/tvGetSource"
-            android:onClick="onClick"
-            android:clickable="true"
-            android:padding="10dp"
-            android:gravity="right"
-            android:textSize="18sp"
-            android:text="@string/str_get_source_code"
-            android:textColor="@android:color/holo_blue_dark"
+        android:layout_height="match_parent">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp">
+
+            <Button
+                android:id="@+id/search"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="Search"
+                android:textAllCaps="false"
+                android:textSize="20sp"
+                tools:ignore="HardcodedText" />
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Spo2: "
+                    android:textSize="20sp"
+                    tools:ignore="HardcodedText" />
+
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="10dp" />
+
+                <TextView
+                    android:id="@+id/spo2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textSize="20sp"
+                    tools:ignore="HardcodedText" />
+
+                <View
+                    android:layout_width="50dp"
+                    android:layout_height="10dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="pr: "
+                    android:textSize="20sp"
+                    tools:ignore="HardcodedText" />
+
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="10dp" />
+
+                <TextView
+                    android:id="@+id/pr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textSize="20sp"
+                    tools:ignore="HardcodedText" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="100dp"
+                android:layout_marginRight="15dp"
+                android:background="@drawable/round_background_wbg">
+
+                <com.berry_med.bci.utils.ble.WaveForm
+                    android:id="@+id/wave"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_alignParentBottom="true"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="v1.0"
+                android:textSize="13sp"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
     </RelativeLayout>
 
 
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

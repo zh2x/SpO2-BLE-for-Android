@@ -1,15 +1,3 @@
 <resources>
-    <string name="app_name">SpO2 BLE</string>
-
-    <string name="turn_on_bluetooth">Turn On Bluetooth</string>
-    <string name="turn_off_bluetooth">Turn Off Bluetooth</string>
-    <string name="search_oximeters">Search</string>
-    <string name="str_device_name">Device Name</string>
-    <string name="str_firmware_version">Firmware Version</string>
-    <string name="str_bluetooth_version">Bluetooth Version</string>
-    <string name="str_bluetooth_name">Bluetooth Name:</string>
-    <string name="str_berry_med">BerryMed</string>
-    <string name="str_get_source_code"><u>Get Source Code>>></u></string>
-    <string name="strChangeName">Change BT Name</string>
-    <string name="strHintModifyName">Modify Bluetooth Name</string>
+    <string name="app_name">BleBciDemo</string>
 </resources>

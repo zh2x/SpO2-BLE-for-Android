@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.berry_med.bci.device_list.DeviceAdapter;
 import com.berry_med.bci.device_list.DeviceListDialog;
+import com.berry_med.bci.utils.Version;
 import com.berry_med.bci.utils.ble.WaveForm;
 import com.berry_med.bci.utils.ble.BluetoothManager;
 import com.berry_med.bci.utils.ble.ParseRunnable;
@@ -22,7 +23,6 @@ import com.berry_med.bci.utils.per.Permissions;
  */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Button search;
     private TextView mSpo2;
     private TextView mPr;
     private WaveForm mWaveForm;
@@ -39,11 +39,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void _init() {
         Permissions.all(this);
-        search = findViewById(R.id.search);
         mSpo2 = findViewById(R.id.spo2);
         mPr = findViewById(R.id.pr);
         mWaveForm = findViewById(R.id.wave);
+        TextView version = findViewById(R.id.version);
         mWaveForm.setWaveformVisibility(true);
+        Button search = findViewById(R.id.search);
         search.setOnClickListener(this);
         _runnable();
         DeviceAdapter adapter = new DeviceAdapter(this);
@@ -51,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ble = new BluetoothManager(this, adapter, mParseRunnable, mWaveForm);
         dialog = new DeviceListDialog(this, ble, adapter);
         ble.scanRule();
+
+        version.setText(Version.getVersionName());
     }
 
     private void _runnable() {

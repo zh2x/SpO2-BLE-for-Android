@@ -19,10 +19,10 @@ import com.clj.fastble.data.BleDevice;
  * @date 2022/12/2 14:54
  */
 public class DeviceListDialog {
-    private Dialog dialog;
-    private Context context;
-    private DeviceAdapter adapter;
-    private BluetoothManager ble;
+    protected Dialog dialog;
+    protected Context context;
+    protected DeviceAdapter adapter;
+    protected BluetoothManager ble;
 
     public DeviceListDialog(Context context, BluetoothManager ble, DeviceAdapter adapter) {
         this.context = context;

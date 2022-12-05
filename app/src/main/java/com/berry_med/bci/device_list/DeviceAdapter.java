@@ -21,8 +21,8 @@ import java.util.List;
  * @date 2022/12/2 17:25
  */
 public class DeviceAdapter extends BaseAdapter {
-    private Context context;
-    private List<BleDevice> devices;
+    protected Context context;
+    protected List<BleDevice> devices;
 
     public DeviceAdapter(Context context) {
         this.context = context;

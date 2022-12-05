@@ -9,7 +9,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class ParseRunnable implements Runnable {
     private final LinkedBlockingQueue<Integer> oxiData = new LinkedBlockingQueue<>(256);
     private final int[] parseBuf = new int[5];
-    private boolean isStop = false;
     private final OnDataChangeListener mOnDataChangeListener;
 
     public ParseRunnable(OnDataChangeListener onDataChangeListener) {
@@ -48,6 +47,7 @@ public class ParseRunnable implements Runnable {
         int spo2 = 0;
         int pr = 0;
         int pi = 0;
+        boolean isStop = false;
         while (!isStop) {
             dat = getData();
             if ((dat & 0x80) > 0) {

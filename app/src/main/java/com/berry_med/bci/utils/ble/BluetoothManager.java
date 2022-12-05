@@ -28,10 +28,10 @@ public class BluetoothManager {
     public static final String UUID_CHARACTER_RECEIVE = UUID.fromString("49535343-1e4d-4bd9-ba61-23c647249616").toString();
     public static final String UUID_MODIFY_BT_NAME = UUID.fromString("49535343-8841-43f4-a8d4-ecbe34729bb3").toString();
 
-    private Activity activity;
-    private DeviceAdapter adapter;
-    private ParseRunnable mParseRunnable;
-    private WaveForm mWaveForm;
+    protected Activity activity;
+    protected DeviceAdapter adapter;
+    protected ParseRunnable mParseRunnable;
+    protected WaveForm mWaveForm;
 
 
     public BluetoothManager(Activity activity, DeviceAdapter adapter, ParseRunnable parseRunnable, WaveForm mWaveForm) {

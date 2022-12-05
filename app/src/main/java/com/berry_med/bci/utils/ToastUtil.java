@@ -14,8 +14,6 @@ public class ToastUtil {
 
     /**
      * LENGTH_SHORT
-     *
-     * @param content
      */
     public static void showToastShort(String content) {
         if (toast == null) {

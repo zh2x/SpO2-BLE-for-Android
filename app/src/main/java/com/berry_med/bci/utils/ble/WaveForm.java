@@ -26,23 +26,23 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @date 2022/12/2 17:25
  */
 public class WaveForm extends SurfaceView {
-    private float LINE_WIDTH = 2f;
-    private int X_STEP = 2;
-    private int BUF_COUNT = 3;
+    protected float LINE_WIDTH = 2f;
+    protected int X_STEP = 2;
+    protected int BUF_COUNT = 3;
 
-    private int MESSAGE_WAVEFORM_GONE = 1;
+    protected int MESSAGE_WAVEFORM_GONE = 1;
 
 
     private int mRectIndex;
     private Rect mDrawRect;
     private Rect mClearRect;
 
-    private Paint mLinePaint;
-    private Path mLinePath;
-    private Path mFillPath;
-    private Paint mFillPaint;
+    protected Paint mLinePaint;
+    protected Path mLinePath;
+    protected Path mFillPath;
+    protected Paint mFillPaint;
 
-    private Paint mClearPaint;
+    protected Paint mClearPaint;
 
     private int preValue = 0;
     private int curValue;

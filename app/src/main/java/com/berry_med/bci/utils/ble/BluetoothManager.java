@@ -1,7 +1,9 @@
 package com.berry_med.bci.utils.ble;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
+import android.util.Log;
 
 import com.berry_med.bci.device_list.DeviceAdapter;
 import com.berry_med.bci.utils.ToastUtil;
@@ -80,6 +82,37 @@ public class BluetoothManager {
         BleManager.getInstance().disableBluetooth();
     }
 
+    /**
+     * Open
+     */
+    public boolean isOpen() {
+        try {
+            if (isSupportBle()) {
+                if (!isBlueEnable()) {
+                    enableBluetooth();
+                    return false;
+                } else {
+                    disconnectAllDevice();
+                    return true;
+                }
+            } else {
+                ToastUtil.showToastShort("Not Support Ble Device");
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (!bluetoothAdapter.isEnabled()) {
+                enableBluetooth();
+                return false;
+            } else {
+                disconnectAllDevice();
+                return true;
+            }
+        }
+    }
+
+
     //Configuration scan rules
     public void scanRule() {
         BleScanRuleConfig scanRuleConfig = new BleScanRuleConfig.Builder()
@@ -155,7 +188,7 @@ public class BluetoothManager {
     }
 
     /**
-     * 断开所有设备
+     * Disconnect All Device
      */
     public void disconnectAllDevice() {
         BleManager.getInstance().disconnectAllDevice();

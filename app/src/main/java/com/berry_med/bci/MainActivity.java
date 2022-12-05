@@ -75,11 +75,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
-        mWaveForm.clear();
-        ble.disconnectAllDevice();
         if (v.getId() == R.id.search) {
+            ble.disconnectAllDevice();
             Permissions.all(this);
-            dialog.show();
+            boolean open = ble.isOpen();
+            if (open) dialog.show();
         }
     }
 }

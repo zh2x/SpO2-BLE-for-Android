@@ -1,11 +1,19 @@
 package com.berry_med.bci.utils.ble;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+
 import com.berry_med.bci.device_list.DeviceAdapter;
+import com.berry_med.bci.device_list.DeviceListDialog;
 import com.berry_med.bci.utils.ToastUtil;
 import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleGattCallback;
@@ -15,6 +23,7 @@ import com.clj.fastble.data.BleDevice;
 import com.clj.fastble.exception.BleException;
 import com.clj.fastble.scan.BleScanRuleConfig;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,7 +41,6 @@ public class BluetoothManager {
     protected DeviceAdapter adapter;
     protected ParseRunnable mParseRunnable;
     protected WaveForm mWaveForm;
-
 
     public BluetoothManager(Activity activity, DeviceAdapter adapter, ParseRunnable parseRunnable, WaveForm mWaveForm) {
         this.activity = activity;
@@ -85,29 +93,24 @@ public class BluetoothManager {
     /**
      * Open
      */
-    public boolean isOpen() {
+    public void isOpen(DeviceListDialog dialog) {
         try {
-            if (isSupportBle()) {
-                if (!isBlueEnable()) {
-                    enableBluetooth();
-                    return false;
-                } else {
-                    disconnectAllDevice();
-                    return true;
-                }
-            } else {
+            disconnectAllDevice();
+            if (!isSupportBle()) {
                 ToastUtil.showToastShort("Not Support Ble Device");
-                return false;
+                return;
+            }
+            if (!isBlueEnable()) {
+                enableBluetooth();
+            } else {
+                dialog.show();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if (!bluetoothAdapter.isEnabled()) {
+            if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
                 enableBluetooth();
-                return false;
             } else {
                 disconnectAllDevice();
-                return true;
             }
         }
     }
@@ -161,6 +164,7 @@ public class BluetoothManager {
 
             }
 
+            @RequiresApi(api = Build.VERSION_CODES.R)
             @Override
             public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
                 ToastUtil.showToastShort("Connect Success");
@@ -169,15 +173,25 @@ public class BluetoothManager {
 
             @Override
             public void onConnectFail(BleDevice bleDevice, BleException exception) {
-
+                mHandler.sendEmptyMessage(0x01);
             }
 
             @Override
             public void onDisConnected(boolean isActiveDisConnected, BleDevice device, BluetoothGatt gatt, int status) {
-                if (mWaveForm != null) mWaveForm.clear();
+                mHandler.sendEmptyMessageDelayed(0x01, 500);
             }
         });
     }
+
+    Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            if (msg.what == 0x01) {
+                if (mWaveForm != null) mWaveForm.clear();
+            }
+            return false;
+        }
+    });
 
 
     /**
@@ -195,7 +209,15 @@ public class BluetoothManager {
     }
 
     //Notify
+    @RequiresApi(api = Build.VERSION_CODES.R)
+    @SuppressLint("MissingPermission")
     public void notification(BleDevice bleDevice, String uuid_service, String uuid_characteristic_notify) {
+        String model = toHexString(bleDevice.getScanRecord());//device model
+        if (DeviceModel.BCI_RR.equals(model)) {
+            mParseRunnable.setModel(DeviceModel.BCI_RR);
+        } else {
+            mParseRunnable.setModel(DeviceModel.BCI_ORDINARY);
+        }
         BleManager.getInstance().notify(
                 bleDevice,
                 uuid_service,
@@ -222,4 +244,24 @@ public class BluetoothManager {
                 }
         );
     }
+
+    /**
+     * model
+     * <p>
+     * 00:00:00
+     */
+    private String toHexString(byte[] scanRecord) {
+        if (scanRecord != null && scanRecord.length > 3) {
+            String first = padLeft(Integer.toHexString(scanRecord[scanRecord.length - 3]));
+            String second = padLeft(Integer.toHexString(scanRecord[scanRecord.length - 2]));
+            String third = padLeft(Integer.toHexString(scanRecord[scanRecord.length - 1]));
+            return first + ":" + second + ":" + third;
+        }
+        return "00:00:00";
+    }
+
+    private String padLeft(String str) {
+        return str.length() >= 2 ? str : "0" + str;
+    }
+
 }

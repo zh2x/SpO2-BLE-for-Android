@@ -47,7 +47,7 @@ public class WaveForm extends SurfaceView {
     private int preValue = 0;
     private int curValue;
 
-    private final LinkedBlockingQueue<Integer> ampQueue;
+    private LinkedBlockingQueue<Integer> ampQueue;
 
     private boolean isVisibility = false;
 
@@ -194,10 +194,15 @@ public class WaveForm extends SurfaceView {
             addAmplitude(0);
             index = 1;
             mRectIndex = 0;
-            mDrawRect = new Rect(mRectIndex * X_STEP - 150, 0, (mRectIndex + 1) * X_STEP, getHeight());
-            mClearRect = new Rect((mRectIndex + 1) * X_STEP - 151, 0, (mRectIndex + 2) * X_STEP, getHeight());
+            mDrawRect = new Rect(0, 0, 0, 0);
+            mClearRect = new Rect(0, 0, 0, 0);
             preValue = 0;
             curValue = 0;
+            ampQueue = new LinkedBlockingQueue<>();
+            mLinePath = new Path();
+            mFillPath = new Path();
+            mLinePath.moveTo(mDrawRect.left, getHeight());
+            mFillPath.moveTo(mDrawRect.left, getHeight());
         } catch (Exception e) {
             e.printStackTrace();
         }

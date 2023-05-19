@@ -79,6 +79,56 @@
                     tools:ignore="HardcodedText" />
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PI: "
+                    android:textSize="20sp"
+                    tools:ignore="HardcodedText" />
+
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="10dp" />
+
+                <TextView
+                    android:id="@+id/pi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textSize="20sp"
+                    tools:ignore="HardcodedText" />
+
+                <View
+                    android:layout_width="50dp"
+                    android:layout_height="10dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="rr: "
+                    android:textSize="20sp"
+                    tools:ignore="HardcodedText" />
+
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="10dp" />
+
+                <TextView
+                    android:id="@+id/rr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textSize="20sp"
+                    tools:ignore="HardcodedText" />
+            </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -86,8 +136,8 @@
                 android:layout_marginLeft="15dp"
                 android:layout_marginTop="100dp"
                 android:layout_marginRight="15dp"
-                android:padding="3dp"
-                android:background="@drawable/round_background_wbg">
+                android:background="@drawable/round_background_wbg"
+                android:padding="3dp">
 
                 <com.berry_med.bci.utils.ble.WaveForm
                     android:id="@+id/wave"

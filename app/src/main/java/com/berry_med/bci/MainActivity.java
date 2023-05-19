@@ -25,6 +25,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private TextView mSpo2;
     private TextView mPr;
+    private TextView mPi;
+    private TextView mRR;
     private WaveForm mWaveForm;
     private BluetoothManager ble;
     private DeviceListDialog dialog;
@@ -38,9 +40,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void _init() {
-        Permissions.all(this);
         mSpo2 = findViewById(R.id.spo2);
         mPr = findViewById(R.id.pr);
+        mPi = findViewById(R.id.pi);
+        mRR = findViewById(R.id.rr);
         mWaveForm = findViewById(R.id.wave);
         TextView version = findViewById(R.id.version);
         mWaveForm.setWaveformVisibility(true);
@@ -72,6 +75,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void waveVal(int wave) {
                 runOnUiThread(() -> mWaveForm.addAmplitude(wave));
             }
+
+            @Override
+            public void piVal(double pi) {
+                runOnUiThread(() -> mPi.setText(pi > 0 ? (pi + "") : "--"));
+            }
+
+            @Override
+            public void rrVal(int rr) {
+                runOnUiThread(() -> mRR.setText(rr > 0 ? (rr + "") : "--"));
+            }
         });
     }
 
@@ -79,10 +92,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.search) {
-            ble.disconnectAllDevice();
-            Permissions.all(this);
-            boolean open = ble.isOpen();
-            if (open) dialog.show();
+            Permissions.all(this, ble, dialog);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mParseRunnable.setStop(false);
     }
 }

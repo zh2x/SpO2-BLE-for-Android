@@ -1,6 +1,9 @@
 package com.berry_med.bci.utils.ble;
 
+
+import java.text.DecimalFormat;
 import java.util.concurrent.LinkedBlockingQueue;
+
 /*
  * @deprecated ParseRunnable
  * @author zl
@@ -8,11 +11,24 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class ParseRunnable implements Runnable {
     private final LinkedBlockingQueue<Integer> oxiData = new LinkedBlockingQueue<>(256);
-    private final int[] parseBuf = new int[5];
+    private final int[] parseBuf = new int[7];
     private final OnDataChangeListener mOnDataChangeListener;
 
+    String model = "00:00:00";
+
+    boolean isStop = false;
+
     public ParseRunnable(OnDataChangeListener onDataChangeListener) {
+        isStop = true;
         this.mOnDataChangeListener = onDataChangeListener;
+    }
+
+    public void setStop(boolean stop) {
+        isStop = stop;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
     }
 
     /**
@@ -24,6 +40,10 @@ public class ParseRunnable implements Runnable {
         void prVal(int pr);
 
         void waveVal(int wave);
+
+        void piVal(double pi);
+
+        void rrVal(int rr);
     }
 
     /**
@@ -43,29 +63,36 @@ public class ParseRunnable implements Runnable {
      */
     @Override
     public void run() {
-        int dat = 0;
-        int spo2 = 0;
-        int pr = 0;
-        int pi = 0;
-        boolean isStop = false;
-        while (!isStop) {
-            dat = getData();
+        int PACKAGE_LEN = 7;
+        while (isStop) {
+            int dat = getData();
             if ((dat & 0x80) > 0) {
                 parseBuf[0] = dat;
-                int PACKAGE_LEN = 5;
                 for (int i = 1; i < PACKAGE_LEN; i++) {
                     dat = getData();
                     if ((dat & 0x80) == 0) parseBuf[i] = dat;
                 }
-                spo2 = parseBuf[4];
-                pr = parseBuf[3] | ((parseBuf[2] & 0x40) << 1);
-                pi = parseBuf[0] & 0x0f;
-
+                int beep = parseBuf[0];
+                int wave = parseBuf[1];
+                int spo2 = parseBuf[4];
+                int pr = parseBuf[3] | ((parseBuf[2] & 0x40) << 1);
+                int battery = -1;
+                int rr = -1;
+                double pi = 0;
+                if (model.equals(DeviceModel.BCI_RR)) {
+                    pi = _calculatePi(beep, parseBuf[2]);
+                    battery = parseBuf[5];
+                    rr = parseBuf[6];
+                } else {
+                    pi = parseBuf[0] & 0x0f;
+                }
                 if (spo2 < 35 || spo2 > 100) spo2 = 0;
                 if (pr < 25 || pr > 250) pr = 0;
 
                 mOnDataChangeListener.spo2Val(spo2);
                 mOnDataChangeListener.prVal(pr);
+                mOnDataChangeListener.piVal(pi);
+                mOnDataChangeListener.rrVal(rr);
                 mOnDataChangeListener.waveVal(parseBuf[1]);
             }
         }
@@ -129,12 +156,17 @@ public class ParseRunnable implements Runnable {
     }
 
     private int getData() {
-        int dat = 0;
         try {
-            dat = oxiData.take();
+            return oxiData.take();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return dat;
+        return 0;
+    }
+
+    private double _calculatePi(int lower, int higher) {
+        DecimalFormat df = new DecimalFormat("#.00");
+        String value = df.format(((lower & 0X0F) + (higher & 0X0F) * 16) / 10.0);
+        return Double.parseDouble(value);
     }
 }

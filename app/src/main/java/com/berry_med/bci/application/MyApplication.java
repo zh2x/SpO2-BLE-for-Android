@@ -5,9 +5,9 @@ import android.app.Application;
 import android.content.Context;
 
 /*
- * @deprecated Application
- * @author zl
- * @date 2022/12/2 17:25
+ * description: MyApplication
+ * author: zl
+ * date: 2024/10/23 9:42
  */
 public class MyApplication extends Application {
     @SuppressLint("StaticFieldLeak")

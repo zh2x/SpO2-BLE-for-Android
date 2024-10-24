@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <solid android:color="@color/berry_med" />
+    <stroke
+        android:width="1dp"
+        android:color="#00000000" />
+    <!--  角的话，里边有参数可以单独设置  -->
+    <corners
+        android:topLeftRadius="10dp"
+        android:topRightRadius="10dp" />
+</shape>

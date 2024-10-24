@@ -1,98 +1,159 @@
 package com.berry_med.bci;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
-import com.berry_med.bci.device_list.DeviceAdapter;
-import com.berry_med.bci.device_list.DeviceListDialog;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.berry_med.bci.blutooth.MyBluetooth;
+import com.berry_med.bci.blutooth.ParseRunnable;
+import com.berry_med.bci.blutooth.WaveForm;
+import com.berry_med.bci.dialog.DeviceAdapter;
+import com.berry_med.bci.dialog.MyDialog;
+import com.berry_med.bci.utils.Permissions;
+import com.berry_med.bci.utils.ToastUtil;
 import com.berry_med.bci.utils.Version;
-import com.berry_med.bci.utils.ble.WaveForm;
-import com.berry_med.bci.utils.ble.BluetoothManager;
-import com.berry_med.bci.utils.ble.ParseRunnable;
-import com.berry_med.bci.utils.per.Permissions;
 
-/*
- * @deprecated  MainActivity
- * @author zl
- * @date 2022/12/2 13:44
- */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-
+    private TextView mName;
+    private TextView mMac;
     private TextView mSpo2;
     private TextView mPr;
     private TextView mPi;
-    private TextView mRR;
-    private WaveForm mWaveForm;
-    private BluetoothManager ble;
-    private DeviceListDialog dialog;
+    //    private TextView mBattery;
+    private TextView mRr;
+//    private TextView mAf;
+
+    private EditText mDeviceName;
+
+    private MyBluetooth ble;
+    private MyDialog dialog;
     private ParseRunnable mParseRunnable;
+    private WaveForm mWaveForm;
+
+    private RadioButton bciRadioButton;
+    private RadioButton berryRadioButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        _init();
+        initView();
+        initRunnable();
+        DeviceAdapter adapter = new DeviceAdapter(this);
+        new Thread(mParseRunnable).start();
+        ble = new MyBluetooth(this, adapter, mParseRunnable, mWaveForm);
+        dialog = new MyDialog(this, ble, adapter);
+        ble.scanRule();
     }
 
-    private void _init() {
+    private void initView() {
+        mName = findViewById(R.id.device_name);
+        mMac = findViewById(R.id.device_mac);
         mSpo2 = findViewById(R.id.spo2);
         mPr = findViewById(R.id.pr);
         mPi = findViewById(R.id.pi);
-        mRR = findViewById(R.id.rr);
-        mWaveForm = findViewById(R.id.wave);
+//        mBattery = findViewById(R.id.battery);
+        mRr = findViewById(R.id.rr);
+//        mAf = findViewById(R.id.af);
+        mDeviceName = findViewById(R.id.input_device_name);
         TextView version = findViewById(R.id.version);
+        version.setText(Version.getVersionName());
+        mWaveForm = findViewById(R.id.wave_form);
         mWaveForm.setWaveformVisibility(true);
         Button search = findViewById(R.id.search);
         search.setOnClickListener(this);
-        _runnable();
-        DeviceAdapter adapter = new DeviceAdapter(this);
-        new Thread(mParseRunnable).start();
-        ble = new BluetoothManager(this, adapter, mParseRunnable, mWaveForm);
-        dialog = new DeviceListDialog(this, ble, adapter);
-        ble.scanRule();
+        Button confirm = findViewById(R.id.confirm);
+        confirm.setOnClickListener(this);
 
-        version.setText(Version.getVersionName());
+//        RadioGroup mRadioGroup = findViewById(R.id.radioGroup);
+        bciRadioButton = findViewById(R.id.bci_radio);
+        berryRadioButton = findViewById(R.id.berry_radio);
+//        mRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+//            if (checkedId == R.id.bci_radio) {
+//                ble.writeHex("0xe0");
+//            } else if (checkedId == R.id.berry_radio) {
+//                ble.writeHex("0xe1");
+//            }
+//        });
+
+        bciRadioButton.setOnClickListener(v -> mHandler.sendEmptyMessage(0x02));
+        berryRadioButton.setOnClickListener(v -> mHandler.sendEmptyMessage(0x03));
     }
 
-    private void _runnable() {
+    private void initRunnable() {
         mParseRunnable = new ParseRunnable(new ParseRunnable.OnDataChangeListener() {
             @Override
-            public void spo2Val(int spo2) {
-                runOnUiThread(() -> mSpo2.setText(spo2 > 0 ? (spo2 + "") : "--"));
+            public void deviceInfo(String name, String mac) {
+                runOnUiThread(() -> {
+                    mName.setText(!TextUtils.isEmpty(name) ? name : "--");
+                    mMac.setText(!TextUtils.isEmpty(mac) ? mac : "--");
+                    mHandler.sendEmptyMessage(0x02);
+                });
             }
 
             @Override
-            public void prVal(int pr) {
-                runOnUiThread(() -> mPr.setText(pr > 0 ? (pr + "") : "--"));
+            public void value(int spo2, int pr, double pi, int rr, int wave) {
+                runOnUiThread(() -> {
+                    mSpo2.setText(spo2 > 0 ? (spo2 + "") : "--");
+                    mPr.setText(pr > 0 ? (pr + "") : "--");
+                    mPi.setText(pi > 0 ? (pi + "") : "--");
+//                    mBattery.setText(battery > 0 ? (battery + "") : "--");
+                    mRr.setText(rr > 0 ? (rr + "") : "--");
+//                    mAf.setText(af > 0 ? (af + "") : "--");
+                    mWaveForm.addAmplitude(wave);
+                });
             }
 
             @Override
-            public void waveVal(int wave) {
-                runOnUiThread(() -> mWaveForm.addAmplitude(wave));
-            }
-
-            @Override
-            public void piVal(double pi) {
-                runOnUiThread(() -> mPi.setText(pi > 0 ? (pi + "") : "--"));
-            }
-
-            @Override
-            public void rrVal(int rr) {
-                runOnUiThread(() -> mRR.setText(rr > 0 ? (rr + "") : "--"));
+            public void model(boolean berry) {
+                runOnUiThread(() -> {
+                    if (berry) {
+                        berryRadioButton.setChecked(true);
+                    } else {
+                        bciRadioButton.setChecked(true);
+                    }
+                });
             }
         });
     }
 
-    @SuppressLint("NonConstantResourceId")
+    Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            if (msg.what == 0x01) {
+                ble.disconnectAllDevice();
+                mDeviceName.setText("");
+                ToastUtil.showToastShort("Please reconnect the device!");
+            } else if (msg.what == 0x02) {
+                ble.writeHex("0xe0");
+            } else if (msg.what == 0x03) {
+                ble.writeHex("0xe1");
+            }
+            return false;
+        }
+    });
+
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.search) {
             Permissions.all(this, ble, dialog);
+        } else if (v.getId() == R.id.confirm) {
+            String name = mDeviceName.getText().toString().trim();
+            if (!TextUtils.isEmpty(name)) {
+                ble.bleRename(name);
+                mHandler.sendEmptyMessageDelayed(0x01, 500);
+            } else {
+                ToastUtil.showToastShort("Name is Empty");
+            }
         }
     }
 

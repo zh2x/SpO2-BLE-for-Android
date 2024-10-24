@@ -5,6 +5,11 @@ import android.content.pm.PackageManager;
 
 import com.berry_med.bci.application.MyApplication;
 
+/*
+ * description: APP Version
+ * author: zl
+ * date: 2024/10/23 9:51
+ */
 public class Version {
     public static String getVersionName() {
         try {
@@ -13,6 +18,7 @@ public class Version {
             String version = info.versionName;
             return "v" + version;
         } catch (Exception e) {
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
             return "";
         }

@@ -5,16 +5,13 @@ import android.widget.Toast;
 import com.berry_med.bci.application.MyApplication;
 
 /*
- * @deprecated Toast
- * @author zl
- * @date 2022/12/2 16:21
+ * description: Toast
+ * author: zl
+ * date: 2024/10/23 9:49
  */
 public class ToastUtil {
     private static Toast toast;
 
-    /**
-     * LENGTH_SHORT
-     */
     public static void showToastShort(String content) {
         if (toast == null) {
             toast = Toast.makeText(MyApplication.getContext(), content, Toast.LENGTH_SHORT);

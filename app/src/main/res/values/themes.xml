@@ -2,6 +2,7 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.SpO2BLEforAndroid" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
         <item name="colorPrimary">@color/berry_med</item>
         <item name="colorPrimaryVariant">@color/berry_med</item>
         <item name="colorOnPrimary">@color/white</item>
@@ -12,7 +13,6 @@
     </style>
 
     <style name="Theme.SpO2BLEforAndroid" parent="Base.Theme.SpO2BLEforAndroid" />
-
     <!--   progress dialog  -->
     <style name="my_dialog" parent="@android:style/Theme.Dialog">
         <item name="android:windowFrame">@null</item>

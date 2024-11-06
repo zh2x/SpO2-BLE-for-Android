@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -174,7 +175,7 @@ public class MyBluetooth {
             }
 
             @Override
-            public void onConnectFail(BleDevice bleDevice, BleException exception) {
+            public void onConnectFail(BleDevice bleDevice, BleException e) {
                 mHandler.sendEmptyMessage(0x01);
             }
 
@@ -192,7 +193,7 @@ public class MyBluetooth {
                 if (mWaveForm != null) mWaveForm.clear();
                 if (mParseRunnable != null) {
                     mParseRunnable.getOnDataChangeListener().deviceInfo("--", "--");
-                    mParseRunnable.getOnDataChangeListener().value(0, 0, 0, 0, 0);
+                    mParseRunnable.getOnDataChangeListener().value(0, 0, 0, 0, 0, -1);
                 }
             }
             return false;
@@ -203,7 +204,9 @@ public class MyBluetooth {
         this.bleDevice = device;
         String model = toHexString(device.getScanRecord());//device model
         mParseRunnable.setModel(model);
-        mParseRunnable.getOnDataChangeListener().deviceInfo(device.getName().replace("\0", ""), device.getMac());
+        String name = !TextUtils.isEmpty(device.getName()) ? device.getName() : "";
+        String mac = !TextUtils.isEmpty(device.getMac()) ? device.getMac() : "";
+        mParseRunnable.getOnDataChangeListener().deviceInfo(name.replace("\0", ""), mac);
         BleManager.getInstance().notify(
                 device,
                 Model.UUID_SERVICE_DATA,
@@ -215,18 +218,13 @@ public class MyBluetooth {
                     }
 
                     @Override
-                    public void onNotifyFailure(BleException exception) {
+                    public void onNotifyFailure(BleException e) {
 
                     }
 
                     @Override
                     public void onCharacteristicChanged(byte[] data) {
-                        try {
-                            if (mParseRunnable != null) mParseRunnable.add(data);
-                        } catch (Exception e) {
-                            //noinspection CallToPrintStackTrace
-                            e.printStackTrace();
-                        }
+                        if (mParseRunnable != null) mParseRunnable.add(data);
                     }
                 }
         );
@@ -249,13 +247,13 @@ public class MyBluetooth {
                     new BleWriteCallback() {
                         @Override
                         public void onWriteSuccess(int current, int total, byte[] justWrite) {
-                            Log.i("BciDemo", "success");
+                            Log.i("TAG", "success");
 
                         }
 
                         @Override
-                        public void onWriteFailure(BleException exception) {
-                            Log.i("BciDemo", "failed");
+                        public void onWriteFailure(BleException e) {
+                            Log.i("TAG", "failed");
                         }
                     }
             );
@@ -274,13 +272,12 @@ public class MyBluetooth {
                     new BleWriteCallback() {
                         @Override
                         public void onWriteSuccess(int current, int total, byte[] justWrite) {
-                            Log.i("BciDemo", "success");
-
+                            Log.i("TAG", "success");
                         }
 
                         @Override
-                        public void onWriteFailure(BleException exception) {
-                            Log.i("BciDemo", "failed");
+                        public void onWriteFailure(BleException e) {
+                            Log.i("TAG", "failed");
                         }
                     }
             );

@@ -2,6 +2,7 @@ package com.berry_med.bci.blutooth;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -44,25 +45,16 @@ public class ParseRunnable implements Runnable {
      * interface for parameters changed.
      */
     public interface OnDataChangeListener {
-//        void spo2Val(int spo2);
-//
-//        void prVal(int pr);
-//
-//        void waveVal(int wave);
-//
-//        void piVal(double pi);
-//
-//        void battery(int battery);
-//
-//        void rrVal(int rr);
-//
-//        void afVal(int af);
 
         void deviceInfo(String name, String mac);
 
-        void value(int spo2, int pr, double pi, int rr, int wave);
+        void value(int spo2, int pr, double pi, int rr, int wave, int packetFreq);
 
         void model(boolean berry);
+
+        void hardwareVersion(String v);
+
+        void softwareVersion(String v);
     }
 
     /**
@@ -70,15 +62,39 @@ public class ParseRunnable implements Runnable {
      *
      * @param data data from Bluetooth Device
      */
-    public void add(byte[] data) throws Exception {
-        if (data != null && data.length >= 2) {
-            boolean berry = berryProtocol(data);
-            model = berry ? Model.BERRY : currentModel;
-            mOnDataChangeListener.model(berry);
-            for (byte d : data) {
-                oxiData.put(toUnsignedInt(d));
+    public void add(byte[] data) {
+        try {
+            if (data != null) {
+                String ascii = convertToAscii(data);
+                if (ascii.contains("SV")) {
+                    byte[] res = Arrays.copyOfRange(data, 2, data.length - 1);
+                    String sw = convertToAscii(res);
+                    mOnDataChangeListener.softwareVersion(sw);
+                } else if (ascii.contains("HV")) {
+                    byte[] res = Arrays.copyOfRange(data, 2, data.length - 1);
+                    String hw = convertToAscii(res);
+                    mOnDataChangeListener.hardwareVersion(hw);
+                } else {
+                    if (data.length >= 2) {
+                        boolean berry = berryProtocol(data);
+                        model = berry ? Model.BERRY : currentModel;
+                        mOnDataChangeListener.model(berry);
+                        for (byte d : data) oxiData.put(toUnsignedInt(d));
+                    }
+                }
             }
+        } catch (Exception e) {
+            //noinspection CallToPrintStackTrace
+            e.printStackTrace();
         }
+    }
+
+    private String convertToAscii(byte[] array) {
+        StringBuilder sb = new StringBuilder();
+        for (int i : array) {
+            sb.append((char) (i & 0xff));
+        }
+        return sb.toString();
     }
 
     /**
@@ -122,11 +138,7 @@ public class ParseRunnable implements Runnable {
         } else {
             pi = data[0] & 0x0f;
         }
-        if (spo2 < 35 || spo2 > 100) spo2 = 0;
-        if (pr < 25 || pr > 250) pr = 0;
-        if (spo2 == 0 || pr == 0) pi = 0;
-
-        mOnDataChangeListener.value(spo2, pr, pi, rr, wave);
+        mOnDataChangeListener.value(spo2, pr, pi, rr, wave, -1);
     }
 
     public void berryParse(int[] array) {
@@ -169,12 +181,9 @@ public class ParseRunnable implements Runnable {
                 int pr = data.get(6);
                 double pi = data.get(10) / 10.0;
                 int wave = data.get(12);
+                int packetFreq = data.get(18);
 
-                if (spo2 < 35 || spo2 > 100) spo2 = 0;
-                if (pr < 25 || pr > 250) pr = 0;
-                if (spo2 == 0 || pr == 0) pi = 0;
-
-                mOnDataChangeListener.value(spo2, pr, pi, 0, wave);
+                mOnDataChangeListener.value(spo2, pr, pi, 0, wave, packetFreq);
             }
             i += 20; // Move back one group
             validIndex = i;
@@ -184,56 +193,6 @@ public class ParseRunnable implements Runnable {
         buffArray = new ArrayList<>(buffArray.subList(validIndex, buffArray.size()));
     }
 
-    //PI
-    public static double getFloatPi(int value) {
-        switch (value & 15) {
-            case 0:
-                return 0.1;
-            case 1:
-                return 0.2;
-            case 2:
-                return 0.4;
-            case 3:
-                return 0.7;
-            case 4:
-                return 1.4;
-            case 5:
-                return 2.7;
-            case 6:
-                return 5.3;
-            case 7:
-                return 10.3;
-            case 8:
-                return 20.0;
-            default:
-                return 0;
-        }
-    }
-
-    //SI
-    public static int getIntPi(double pi) {
-        if (pi >= 20.0) {
-            return 8;
-        } else if (pi >= 10.3) {
-            return 7;
-        } else if (pi >= 5.3) {
-            return 6;
-        } else if (pi >= 2.7) {
-            return 5;
-        } else if (pi >= 1.4) {
-            return 4;
-        } else if (pi >= 0.7) {
-            return 3;
-        } else if (pi >= 0.4) {
-            return 2;
-        } else if (pi >= 0.2) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
-
-
     private int toUnsignedInt(byte x) {
         return ((int) x) & 0xff;
     }
@@ -241,7 +200,7 @@ public class ParseRunnable implements Runnable {
     private int getData() {
         try {
             return oxiData.take();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }

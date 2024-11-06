@@ -158,7 +158,7 @@ public class WaveForm extends SurfaceView {
                             mLinePath.moveTo(0, getHeight() - preValue);
                         }
                         mDrawRect.set(mRectIndex * X_STEP, 0, (mRectIndex + 1) * X_STEP, getHeight());
-                        curValue = (float) (amp * getHeight()) / 150;
+                        curValue = (float) (amp * getHeight()) / 110;
                         mLinePath.quadTo(mDrawRect.centerX(), getHeight() - preValue / 2 - curValue / 2, mDrawRect.right, getHeight() - curValue);
 //                        mFillPath.lineTo(mDrawRect.right, getHeight() - curValue);
                         preValue = curValue;

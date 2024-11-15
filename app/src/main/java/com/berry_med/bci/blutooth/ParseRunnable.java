@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /*
  * description: ParseRunnable
@@ -37,10 +39,6 @@ public class ParseRunnable implements Runnable {
         this.currentModel = model;
     }
 
-    public String getModel() {
-        return model;
-    }
-
     /**
      * interface for parameters changed.
      */
@@ -67,13 +65,9 @@ public class ParseRunnable implements Runnable {
             if (data != null) {
                 String ascii = convertToAscii(data);
                 if (ascii.contains("SV")) {
-                    byte[] res = Arrays.copyOfRange(data, 2, data.length - 1);
-                    String sw = convertToAscii(res);
-                    mOnDataChangeListener.softwareVersion(sw);
+                    mOnDataChangeListener.softwareVersion(getHvOrSv(data));
                 } else if (ascii.contains("HV")) {
-                    byte[] res = Arrays.copyOfRange(data, 2, data.length - 1);
-                    String hw = convertToAscii(res);
-                    mOnDataChangeListener.hardwareVersion(hw);
+                    mOnDataChangeListener.hardwareVersion(getHvOrSv(data));
                 } else {
                     if (data.length >= 2) {
                         boolean berry = berryProtocol(data);
@@ -95,6 +89,15 @@ public class ParseRunnable implements Runnable {
             sb.append((char) (i & 0xff));
         }
         return sb.toString();
+    }
+
+    private String getHvOrSv(byte[] data) {
+        byte[] res = Arrays.copyOfRange(data, 2, data.length - 1);
+        Matcher matcher = Pattern.compile("SV[^?\\x00]+").matcher(convertToAscii(res));
+        if (matcher.find() && matcher.group().contains(".")) {
+            return matcher.group();
+        }
+        return "";
     }
 
     /**

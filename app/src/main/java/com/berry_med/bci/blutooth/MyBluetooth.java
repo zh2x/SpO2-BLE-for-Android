@@ -15,6 +15,7 @@ import com.berry_med.bci.dialog.MyDialog;
 import com.berry_med.bci.utils.ToastUtil;
 import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleGattCallback;
+import com.clj.fastble.callback.BleMtuChangedCallback;
 import com.clj.fastble.callback.BleNotifyCallback;
 import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.callback.BleWriteCallback;
@@ -202,6 +203,7 @@ public class MyBluetooth {
 
     private void notification(BleDevice device) {
         this.bleDevice = device;
+        setMtu(bleDevice, 128);
         String model = toHexString(device.getScanRecord());//device model
         mParseRunnable.setModel(model);
         String name = !TextUtils.isEmpty(device.getName()) ? device.getName() : "";
@@ -297,5 +299,22 @@ public class MyBluetooth {
             return String.format(Locale.ENGLISH, "%02d:%02d:%02d", num1, num2, num3);
         }
         return "";
+    }
+
+    /**
+     * 设置最大传输单元MTU
+     */
+    public void setMtu(BleDevice bleDevice, int mtu) {
+        BleManager.getInstance().setMtu(bleDevice, mtu, new BleMtuChangedCallback() {
+            @Override
+            public void onSetMTUFailure(BleException exception) {
+                // 设置MTU失败
+            }
+
+            @Override
+            public void onMtuChanged(int mtu) {
+                // 设置MTU成功，并获得当前设备传输支持的MTU值
+            }
+        });
     }
 }

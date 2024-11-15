@@ -65,9 +65,9 @@ public class ParseRunnable implements Runnable {
             if (data != null) {
                 String ascii = convertToAscii(data);
                 if (ascii.contains("SV")) {
-                    mOnDataChangeListener.softwareVersion(getHvOrSv(data));
+                    mOnDataChangeListener.softwareVersion(getHvOrSv(data, "SV"));
                 } else if (ascii.contains("HV")) {
-                    mOnDataChangeListener.hardwareVersion(getHvOrSv(data));
+                    mOnDataChangeListener.hardwareVersion(getHvOrSv(data, "HV"));
                 } else {
                     if (data.length >= 2) {
                         boolean berry = berryProtocol(data);
@@ -91,9 +91,9 @@ public class ParseRunnable implements Runnable {
         return sb.toString();
     }
 
-    private String getHvOrSv(byte[] data) {
+    private String getHvOrSv(byte[] data, String ver) {
         byte[] res = Arrays.copyOfRange(data, 2, data.length - 1);
-        Matcher matcher = Pattern.compile("SV[^?\\x00]+").matcher(convertToAscii(res));
+        Matcher matcher = Pattern.compile(ver + "[^?\\x00]+").matcher(convertToAscii(res));
         if (matcher.find() && matcher.group().contains(".")) {
             return matcher.group();
         }

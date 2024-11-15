@@ -172,6 +172,13 @@ public class MyBluetooth {
             @Override
             public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
                 ToastUtil.showToastShort("Connect Success");
+                setMtu(bleDevice, 128);
+                try {
+                    Thread.sleep(500);
+                } catch (Exception e) {
+                    //noinspection CallToPrintStackTrace
+                    e.printStackTrace();
+                }
                 notification(bleDevice);
             }
 
@@ -203,7 +210,6 @@ public class MyBluetooth {
 
     private void notification(BleDevice device) {
         this.bleDevice = device;
-        setMtu(bleDevice, 128);
         String model = toHexString(device.getScanRecord());//device model
         mParseRunnable.setModel(model);
         String name = !TextUtils.isEmpty(device.getName()) ? device.getName() : "";

@@ -138,7 +138,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void value2(int index, int wave) {
-                runOnUiThread(() -> mWaveForm.addAmplitude(index));
+//                runOnUiThread(() -> mWaveForm.addAmplitude(index));
+                runOnUiThread(() -> mWaveForm.addAmplitude(wave));
             }
 
             @Override

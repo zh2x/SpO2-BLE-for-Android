@@ -26,7 +26,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class WaveForm extends SurfaceView {
     protected float LINE_WIDTH = 2f;
-    protected int X_STEP = 2;
+    protected int X_STEP = 1;
     protected int BUF_COUNT = 3;
 
     protected int MESSAGE_WAVEFORM_GONE = 1;
@@ -158,7 +158,7 @@ public class WaveForm extends SurfaceView {
                             mLinePath.moveTo(0, getHeight() - preValue);
                         }
                         mDrawRect.set(mRectIndex * X_STEP, 0, (mRectIndex + 1) * X_STEP, getHeight());
-                        curValue = (float) (amp * getHeight()) / 110;
+                        curValue = (float) (amp * getHeight()) / 300;
                         mLinePath.quadTo(mDrawRect.centerX(), getHeight() - preValue / 2 - curValue / 2, mDrawRect.right, getHeight() - curValue);
 //                        mFillPath.lineTo(mDrawRect.right, getHeight() - curValue);
                         preValue = curValue;

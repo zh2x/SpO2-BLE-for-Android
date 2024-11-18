@@ -25,6 +25,7 @@
             tools:ignore="HardcodedText" />
 
         <RadioGroup
+            android:id="@+id/protocolRG"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
@@ -232,8 +233,8 @@
             android:layout_height="wrap_content"
             android:background="@drawable/round_btn_background"
             android:paddingLeft="15dp"
-            android:paddingRight="15dp"
             android:paddingTop="3dp"
+            android:paddingRight="15dp"
             android:paddingBottom="3dp"
             android:text="HV"
             android:textColor="@color/white"
@@ -261,8 +262,8 @@
             android:layout_height="wrap_content"
             android:background="@drawable/round_btn_background"
             android:paddingLeft="15dp"
-            android:paddingRight="15dp"
             android:paddingTop="3dp"
+            android:paddingRight="15dp"
             android:paddingBottom="3dp"
             android:text="SV"
             android:textColor="@color/white"
@@ -287,7 +288,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="100dp"
         android:layout_marginTop="5dp"
         android:gravity="center"
         android:orientation="horizontal">
@@ -368,14 +369,9 @@
                 tools:ignore="HardcodedText" />
         </RelativeLayout>
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_marginTop="10dp"
-        android:gravity="center"
-        android:orientation="horizontal">
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -412,66 +408,14 @@
                 android:textSize="15sp"
                 tools:ignore="HardcodedText" />
         </RelativeLayout>
-
-        <View
-            android:layout_width="10dp"
-            android:layout_height="10dp" />
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/round_border">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="5dp"
-                android:text="RR"
-                android:textSize="15sp"
-                tools:ignore="HardcodedText" />
-
-            <TextView
-                android:id="@+id/rrTv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="--"
-                android:textSize="15sp"
-                tools:ignore="HardcodedText" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="5dp"
-                android:layout_marginBottom="5dp"
-                android:text="Resp Rate"
-                android:textSize="15sp"
-                tools:ignore="HardcodedText" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginEnd="5dp"
-                android:layout_marginBottom="5dp"
-                android:text=""
-                android:textSize="15sp"
-                tools:ignore="HardcodedText,RelativeOverlap" />
-        </RelativeLayout>
-
     </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="17dp"
         android:layout_gravity="left|center_vertical"
         android:layout_marginTop="15dp"
-        android:text="PR Waveform"
+        android:text="Waveform"
         android:textStyle="bold"
         tools:ignore="HardcodedText,RtlHardcoded" />
 

@@ -25,7 +25,6 @@ import com.clj.fastble.scan.BleScanRuleConfig;
 import com.clj.fastble.utils.HexUtil;
 
 import java.util.List;
-import java.util.Locale;
 
 public class MyBluetooth {
     protected DeviceAdapter adapter;
@@ -201,7 +200,9 @@ public class MyBluetooth {
                 if (mWaveForm != null) mWaveForm.clear();
                 if (mParseRunnable != null) {
                     mParseRunnable.getOnDataChangeListener().deviceInfo("--", "--");
-                    mParseRunnable.getOnDataChangeListener().value(0, 0, 0, 0, 0, -1);
+                    mParseRunnable.getOnDataChangeListener().value(0, 0, 0, 0);
+                    mParseRunnable.getOnDataChangeListener().value1(0, 0, 0, 0);
+                    mParseRunnable.getOnDataChangeListener().value2(0, 0);
                 }
             }
             return false;
@@ -210,8 +211,7 @@ public class MyBluetooth {
 
     private void notification(BleDevice device) {
         this.bleDevice = device;
-        String model = toHexString(device.getScanRecord());//device model
-        mParseRunnable.setModel(model);
+        mParseRunnable.init();
         String name = !TextUtils.isEmpty(device.getName()) ? device.getName() : "";
         String mac = !TextUtils.isEmpty(device.getMac()) ? device.getMac() : "";
         mParseRunnable.getOnDataChangeListener().deviceInfo(name.replace("\0", ""), mac);
@@ -297,15 +297,15 @@ public class MyBluetooth {
      * <p>
      * 00:00:00
      */
-    private String toHexString(byte[] data) {
-        if (data != null && data.length >= 3) {
-            int num1 = data[data.length - 3] & 0xFF;
-            int num2 = data[data.length - 2] & 0xFF;
-            int num3 = data[data.length - 1] & 0xFF;
-            return String.format(Locale.ENGLISH, "%02d:%02d:%02d", num1, num2, num3);
-        }
-        return "";
-    }
+//    private String toHexString(byte[] data) {
+//        if (data != null && data.length >= 3) {
+//            int num1 = data[data.length - 3] & 0xFF;
+//            int num2 = data[data.length - 2] & 0xFF;
+//            int num3 = data[data.length - 1] & 0xFF;
+//            return String.format(Locale.ENGLISH, "%02d:%02d:%02d", num1, num2, num3);
+//        }
+//        return "";
+//    }
 
     /**
      * 设置最大传输单元MTU

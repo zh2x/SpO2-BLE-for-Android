@@ -17,8 +17,6 @@ public class ParseRunnable implements Runnable {
     protected int[] parseBuf = new int[20];
     protected OnDataChangeListener mOnDataChangeListener;
 
-//    private List<Integer> buffArray;
-
     boolean isStop = false;
     private List<Integer> buffArray1;
     private List<Integer> buffArray2;
@@ -33,7 +31,6 @@ public class ParseRunnable implements Runnable {
     }
 
     public void init() {
-//        buffArray = new ArrayList<>();
         buffArray1 = new ArrayList<>();
         buffArray2 = new ArrayList<>();
     }
@@ -143,52 +140,6 @@ public class ParseRunnable implements Runnable {
             buffArray1.add(value);
             buffArray2.add(value);
         }
-
-//        int i = 0; // Current Index
-//        int validIndex = 0; // Valid Index
-//        int maxIndex = buffArray.size() - 20; // Data Space
-//
-//        while (i <= maxIndex) {
-//            // Failed to match the headers
-//            if (buffArray.get(i) != 0xFF || buffArray.get(i + 1) != 0xAA) {
-//                i += 1;
-//                validIndex = i;
-//                continue;
-//            }
-//
-//            // The header is successfully matched
-//            int total = 0;
-//            int checkSum = buffArray.get(i + 19);
-//            for (int index = 0; index <= 18; index++) {
-//                total += buffArray.get(i + index);
-//            }
-//
-//            // If the verification fails, discard the two data
-//            if (checkSum != (total % 256)) {
-//                i += 2;
-//                validIndex = i;
-//                continue;
-//            }
-//
-//            // Extracting a sublist for data
-//            List<Integer> data = buffArray.subList(i, i + 19);
-//
-//            if (data.size() >= 19) {
-//                int spo2 = data.get(4);
-//                int pr = data.get(6);
-//                double pi = data.get(10) / 10.0;
-//                int wave = data.get(12);
-//                int packetFreq = data.get(18);
-//
-//                mOnDataChangeListener.value(spo2, pr, pi, 0, wave, packetFreq);
-//            }
-//            i += 20; // Move back one group
-//            validIndex = i;
-//        }
-//
-//        // Update buffArray to retain only valid data
-//        buffArray = new ArrayList<>(buffArray.subList(validIndex, buffArray.size()));
-
         newBerryPk1();
         newBerryPk2();
     }
@@ -294,22 +245,6 @@ public class ParseRunnable implements Runnable {
         }
         return 0;
     }
-
-    //Berry Protocol
-//    private static boolean berryProtocol(byte[] data) {
-//        for (int i = 0; i < data.length - 1; i++) {
-//            if (data[i] == (byte) 0xFF && data[i + 1] == (byte) 0xAA) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
-//    private double _calculatePi(int lower, int higher) {
-//        DecimalFormat df = new DecimalFormat("#.00");
-//        String value = df.format(((lower & 0x0F) + (higher & 0x0F) * 16) / 10.0);
-//        return Double.parseDouble(value);
-//    }
 
     public OnDataChangeListener getOnDataChangeListener() {
         return mOnDataChangeListener;

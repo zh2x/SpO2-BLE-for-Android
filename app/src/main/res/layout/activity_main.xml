@@ -130,19 +130,6 @@
                 android:textSize="13sp"
                 tools:ignore="HardcodedText" />
 
-            <RadioButton
-                android:id="@+id/rb5"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:button="@null"
-                android:drawableTop="?android:attr/listChoiceIndicatorSingle"
-                android:gravity="center_horizontal"
-                android:padding="0dp"
-                android:text="STOP"
-                android:textSize="13sp"
-                tools:ignore="HardcodedText" />
-
         </RadioGroup>
 
 

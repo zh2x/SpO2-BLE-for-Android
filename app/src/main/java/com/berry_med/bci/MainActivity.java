@@ -93,15 +93,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         frequencyView.setOnCheckedChangeListener((group, id) -> {
             if (id == R.id.rb1) {
-                ble.writeHex("0xF3");
+                ble.writeHex("F801");
             } else if (id == R.id.rb2) {
-                ble.writeHex("0xF0");
+                ble.writeHex("F832");
             } else if (id == R.id.rb3) {
-                ble.writeHex("0xF1");
+                ble.writeHex("F864");
             } else if (id == R.id.rb4) {
-                ble.writeHex("0xF2");
-            } else if (id == R.id.rb5) {
-                ble.writeHex("0xF6");
+                ble.writeHex("F8C8");
             }
         });
     }

@@ -293,21 +293,6 @@ public class MyBluetooth {
     }
 
     /**
-     * model
-     * <p>
-     * 00:00:00
-     */
-//    private String toHexString(byte[] data) {
-//        if (data != null && data.length >= 3) {
-//            int num1 = data[data.length - 3] & 0xFF;
-//            int num2 = data[data.length - 2] & 0xFF;
-//            int num3 = data[data.length - 1] & 0xFF;
-//            return String.format(Locale.ENGLISH, "%02d:%02d:%02d", num1, num2, num3);
-//        }
-//        return "";
-//    }
-
-    /**
      * 设置最大传输单元MTU
      */
     public void setMtu(BleDevice bleDevice, int mtu) {

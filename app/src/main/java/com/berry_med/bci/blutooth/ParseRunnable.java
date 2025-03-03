@@ -18,7 +18,6 @@ public class ParseRunnable implements Runnable {
     protected int[] parseBuf = new int[20];
     protected OnDataChangeListener mOnDataChangeListener;
 
-    private String model = "";
     protected String currentModel = "";
     private List<Integer> buffArray;
 
@@ -33,10 +32,8 @@ public class ParseRunnable implements Runnable {
         isStop = stop;
     }
 
-    public void setModel(String model) {
+    public void init() {
         buffArray = new ArrayList<>();
-        this.model = model;
-        this.currentModel = model;
     }
 
     /**
@@ -47,8 +44,6 @@ public class ParseRunnable implements Runnable {
         void deviceInfo(String name, String mac);
 
         void value(int spo2, int pr, double pi, int rr, int wave, int packetFreq);
-
-        void model(boolean berry);
 
         void hardwareVersion(String v);
 
@@ -70,9 +65,6 @@ public class ParseRunnable implements Runnable {
                     mOnDataChangeListener.hardwareVersion(getHvOrSv(data, "HV"));
                 } else {
                     if (data.length >= 2) {
-                        boolean berry = berryProtocol(data);
-                        model = berry ? Model.BERRY : currentModel;
-                        mOnDataChangeListener.model(berry);
                         for (byte d : data) oxiData.put(toUnsignedInt(d));
                     }
                 }
@@ -86,7 +78,7 @@ public class ParseRunnable implements Runnable {
     private String convertToAscii(byte[] array) {
         StringBuilder sb = new StringBuilder();
         for (int i : array) {
-            sb.append((char) (i & 0xff));
+            sb.append((char) (i & 0xFF));
         }
         return sb.toString();
     }
@@ -108,7 +100,7 @@ public class ParseRunnable implements Runnable {
         int PACKAGE_LEN = 20;
         while (isStop) {
             int data = getData();
-            if (model.equals(Model.BERRY)) {
+            if (Model.MODEL.equals("BERRY")) {
                 parseBuf[0] = data;
                 for (int i = 1; i < PACKAGE_LEN; i++) {
                     parseBuf[i] = getData();
@@ -133,15 +125,15 @@ public class ParseRunnable implements Runnable {
         int wave = data[1];
         int spo2 = data[4];
         int pr = data[3] | ((data[2] & 0x40) << 1);
-        int rr = -1;
-        double pi = 0;
-        if (model.equals(Model.BCI_RR)) {
+        int resp = 0;
+        double pi = 0.0;
+        if (Model.MODEL.equals("BCI-RESP")) {
             pi = _calculatePi(beep, data[2]);
-            rr = data[6];
+            resp = data[6];
         } else {
-            pi = data[0] & 0x0f;
+            pi = data[0] & 0x0F;
         }
-        mOnDataChangeListener.value(spo2, pr, pi, rr, wave, -1);
+        mOnDataChangeListener.value(spo2, pr, pi, resp, wave, -1);
     }
 
     public void berryParse(int[] array) {
@@ -182,11 +174,12 @@ public class ParseRunnable implements Runnable {
             if (data.size() >= 19) {
                 int spo2 = data.get(4);
                 int pr = data.get(6);
+                int rr = data.get(8) + (data.get(9) << 8);
                 double pi = data.get(10) / 10.0;
                 int wave = data.get(12);
                 int packetFreq = data.get(18);
 
-                mOnDataChangeListener.value(spo2, pr, pi, 0, wave, packetFreq);
+                mOnDataChangeListener.value(spo2, pr, pi, rr, wave, packetFreq);
             }
             i += 20; // Move back one group
             validIndex = i;
@@ -197,7 +190,7 @@ public class ParseRunnable implements Runnable {
     }
 
     private int toUnsignedInt(byte x) {
-        return ((int) x) & 0xff;
+        return ((int) x) & 0xFF;
     }
 
     private int getData() {
@@ -208,16 +201,6 @@ public class ParseRunnable implements Runnable {
             e.printStackTrace();
         }
         return 0;
-    }
-
-    //Berry Protocol
-    private static boolean berryProtocol(byte[] data) {
-        for (int i = 0; i < data.length - 1; i++) {
-            if (data[i] == (byte) 0xFF && data[i + 1] == (byte) 0xAA) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private double _calculatePi(int lower, int higher) {

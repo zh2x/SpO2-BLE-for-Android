@@ -1,5 +1,6 @@
 package com.berry_med.bci;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -7,13 +8,13 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.berry_med.bci.blutooth.Model;
 import com.berry_med.bci.blutooth.MyBluetooth;
 import com.berry_med.bci.blutooth.ParseRunnable;
 import com.berry_med.bci.blutooth.WaveForm;
@@ -23,8 +24,7 @@ import com.berry_med.bci.utils.Permissions;
 import com.berry_med.bci.utils.ToastUtil;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private RadioButton bciRadio;
-    private RadioButton berryRadio;
+    private RadioGroup protocolRG;
     private LinearLayout frequencyLayout;
     private RadioGroup frequencyView;
     private TextView packetFreq;
@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView spo2Tv;
     private TextView prTv;
     private TextView piTv;
+    private TextView rrTitle;
     private TextView rrTv;
     private WaveForm mWaveForm;
     private EditText inputDeviceName;
@@ -57,8 +58,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initView() {
-        bciRadio = findViewById(R.id.bci_radio);
-        berryRadio = findViewById(R.id.berry_radio);
+        protocolRG = findViewById(R.id.protocolRG);
         frequencyLayout = findViewById(R.id.frequency_layout);
         frequencyView = findViewById(R.id.frequency_view);
         packetFreq = findViewById(R.id.packetFreq);
@@ -69,13 +69,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         spo2Tv = findViewById(R.id.spo2Tv);
         prTv = findViewById(R.id.prTv);
         piTv = findViewById(R.id.piTv);
+        rrTitle = findViewById(R.id.rr_title);
         rrTv = findViewById(R.id.rrTv);
         mWaveForm = findViewById(R.id.wave_form);
         mWaveForm.setWaveformVisibility(true);
         inputDeviceName = findViewById(R.id.input_device_name);
-
-        bciRadio.setOnClickListener(v -> mHandler.sendEmptyMessage(0x02));
-        berryRadio.setOnClickListener(v -> mHandler.sendEmptyMessage(0x03));
 
         listener();
     }
@@ -85,6 +83,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.confirm).setOnClickListener(this);
         findViewById(R.id.hwBtn).setOnClickListener(this);
         findViewById(R.id.swBtn).setOnClickListener(this);
+
+        protocolRG.setOnCheckedChangeListener((group, id) -> {
+            if (id == R.id.bci_radio) {
+                mHandler.sendEmptyMessage(0x02);
+            } else if (id == R.id.bci_rr_radio) {
+                mHandler.sendEmptyMessage(0x03);
+            } else if (id == R.id.berry_radio) {
+                mHandler.sendEmptyMessage(0x04);
+            }
+        });
 
         frequencyView.setOnCheckedChangeListener((group, id) -> {
             if (id == R.id.rb1) {
@@ -116,23 +124,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 runOnUiThread(() -> {
                     spo2Tv.setText(spo2 != 127 ? String.valueOf(spo2) : "--");
                     prTv.setText(pr != 255 ? String.valueOf(pr) : "--");
-                    piTv.setText(pi > 0 ? String.valueOf(pi) : "--");
-                    rrTv.setText(rr > 0 ? String.valueOf(rr) : "--");
+                    piTv.setText(pi != 0 ? String.valueOf(pi) : "--");
+                    rrTv.setText(rr != 0 ? String.valueOf(rr) : "--");
                     packetFreq.setText(pf != -1 ? pf + "Hz" : "--");
                     mWaveForm.addAmplitude(wave);
-                });
-            }
-
-            @Override
-            public void model(boolean berry) {
-                runOnUiThread(() -> {
-                    if (berry) {
-                        berryRadio.setChecked(true);
-                        frequencyLayout.setVisibility(View.VISIBLE);
-                    } else {
-                        bciRadio.setChecked(true);
-                        frequencyLayout.setVisibility(View.GONE);
-                    }
                 });
             }
 
@@ -175,16 +170,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     Handler mHandler = new Handler(new Handler.Callback() {
+        @SuppressLint("SetTextI18n")
         @Override
         public boolean handleMessage(@NonNull Message msg) {
-            if (msg.what == 0x01) {
-                ble.disconnectAllDevice();
-                name.setText("");
-                ToastUtil.showToastShort("Please reconnect the device!");
-            } else if (msg.what == 0x02) {
-                ble.writeHex("0xE0");
-            } else if (msg.what == 0x03) {
-                ble.writeHex("0xE1");
+            switch (msg.what) {
+                case 0x01:
+                    ble.disconnectAllDevice();
+                    name.setText("");
+                    ToastUtil.showToastShort("Please reconnect the device!");
+                    break;
+                case 0x02:
+                    Model.MODEL = "BCI";
+                    rrTitle.setText("Resp Rate");
+                    frequencyLayout.setVisibility(View.GONE);
+                    ble.writeHex("0xE0");
+                    break;
+                case 0x03:
+                    Model.MODEL = "BCI-RESP";
+                    rrTitle.setText("Resp Rate");
+                    frequencyLayout.setVisibility(View.GONE);
+                    ble.writeHex("0xE0");
+                    break;
+                case 0x04:
+                    Model.MODEL = "BERRY";
+                    rrTitle.setText("RR");
+                    frequencyLayout.setVisibility(View.VISIBLE);
+                    ble.writeHex("0xE1");
+                    break;
             }
             return false;
         }

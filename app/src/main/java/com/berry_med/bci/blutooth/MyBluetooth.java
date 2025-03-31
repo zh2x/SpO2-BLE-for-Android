@@ -31,6 +31,7 @@ public class MyBluetooth {
     protected ParseRunnable mParseRunnable;
     protected WaveForm mWaveForm;
     protected BleDevice bleDevice;
+    private boolean conn = false;
 
     public MyBluetooth(Activity activity, DeviceAdapter adapter, ParseRunnable parseRunnable, WaveForm mWaveForm) {
         this.adapter = adapter;
@@ -170,6 +171,7 @@ public class MyBluetooth {
 
             @Override
             public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
+                setConn(true);
                 ToastUtil.showToastShort("Connect Success");
                 setMtu(bleDevice, 128);
                 try {
@@ -197,10 +199,11 @@ public class MyBluetooth {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
             if (msg.what == 0x01) {
+                setConn(false);
                 if (mWaveForm != null) mWaveForm.clear();
                 if (mParseRunnable != null) {
                     mParseRunnable.getOnDataChangeListener().deviceInfo("--", "--");
-                    mParseRunnable.getOnDataChangeListener().value(0, 0, 0, 0, 0, -1);
+                    mParseRunnable.getOnDataChangeListener().value(0, 0, 0, 0, 0, 0,-1);
                 }
             }
             return false;
@@ -305,5 +308,13 @@ public class MyBluetooth {
                 // 设置MTU成功，并获得当前设备传输支持的MTU值
             }
         });
+    }
+
+    public boolean isConn() {
+        return conn;
+    }
+
+    public void setConn(boolean conn) {
+        this.conn = conn;
     }
 }

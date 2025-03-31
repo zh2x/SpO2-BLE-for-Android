@@ -1,18 +1,26 @@
 package com.berry_med.bci;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import com.berry_med.bci.blutooth.Model;
 import com.berry_med.bci.blutooth.MyBluetooth;
@@ -20,8 +28,12 @@ import com.berry_med.bci.blutooth.ParseRunnable;
 import com.berry_med.bci.blutooth.WaveForm;
 import com.berry_med.bci.dialog.DeviceAdapter;
 import com.berry_med.bci.dialog.MyDialog;
+import com.berry_med.bci.utils.MyFiles;
 import com.berry_med.bci.utils.Permissions;
 import com.berry_med.bci.utils.ToastUtil;
+
+import java.io.File;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private RadioGroup protocolRG;
@@ -43,6 +55,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private MyBluetooth ble;
     private MyDialog dialog;
     private ParseRunnable mParseRunnable;
+    private MyFiles myFiles;
+    private ActivityResultLauncher<Intent> launcher;
+    private Button recordShare;
+    private long startTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +91,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mWaveForm.setWaveformVisibility(true);
         inputDeviceName = findViewById(R.id.input_device_name);
 
+        myFiles = new MyFiles();
         listener();
+
+        launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        });
     }
 
     private void listener() {
@@ -83,6 +103,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.confirm).setOnClickListener(this);
         findViewById(R.id.hwBtn).setOnClickListener(this);
         findViewById(R.id.swBtn).setOnClickListener(this);
+        recordShare = findViewById(R.id.record_share);
+        recordShare.setOnClickListener(this);
 
         protocolRG.setOnCheckedChangeListener((group, id) -> {
             if (id == R.id.bci_radio) {
@@ -120,14 +142,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             @Override
-            public void value(int spo2, int pr, double pi, int rr, int wave, int pf) {
+            public void value(int spo2, int rr, int pr, double pi, int resp, int wave, int pf) {
                 runOnUiThread(() -> {
-                    spo2Tv.setText(spo2 != 127 ? String.valueOf(spo2) : "--");
-                    prTv.setText(pr != 255 ? String.valueOf(pr) : "--");
-                    piTv.setText(pi != 0 ? String.valueOf(pi) : "--");
-                    rrTv.setText(rr != 0 ? String.valueOf(rr) : "--");
-                    packetFreq.setText(pf != -1 ? pf + "Hz" : "--");
                     mWaveForm.addAmplitude(wave);
+                    long currentTime = System.currentTimeMillis();
+                    if (currentTime - startTime > 100) {
+                        spo2Tv.setText(spo2 != 127 ? String.valueOf(spo2) : "--");
+                        prTv.setText(pr != 255 ? String.valueOf(pr) : "--");
+                        piTv.setText(pi != 0 ? String.valueOf(pi) : "--");
+                        rrTv.setText(rr != 0 ? String.valueOf(rr) : "--");
+                        packetFreq.setText(pf != -1 ? pf + "Hz" : "--");
+                        myFiles.writeTxt(currentTime, rr, pr, spo2);
+                        startTime = currentTime;
+                    }
                 });
             }
 
@@ -147,11 +174,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mParseRunnable.setStop(false);
+        if (mParseRunnable != null) mParseRunnable.setStop(false);
+        if (launcher != null) launcher.unregister();
+        if (myFiles != null) myFiles.close();
     }
 
     @Override
     public void onClick(View v) {
+        startTime = System.currentTimeMillis();
         if (v.getId() == R.id.search) {
             Permissions.all(this, ble, dialog);
         } else if (v.getId() == R.id.confirm) {
@@ -166,6 +196,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ble.writeHex("0xFE");
         } else if (v.getId() == R.id.swBtn) {
             ble.writeHex("0xFF");
+        } else if (v.getId() == R.id.record_share) {
+            Permissions.storage(this);
+            String name = recordShare.getText().toString().trim();
+            if (ble.isConn()) {
+                if (name.contains("Start")) {
+                    mHandler.sendEmptyMessage(0x05);
+                } else {
+                    mHandler.sendEmptyMessage(0x06);
+                    mHandler.sendEmptyMessageDelayed(0x08, 1000);
+                }
+            } else {
+                mHandler.sendEmptyMessage(0x07);
+            }
         }
     }
 
@@ -197,8 +240,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     frequencyLayout.setVisibility(View.VISIBLE);
                     ble.writeHex("0xE1");
                     break;
+                case 0x05:
+                    myFiles.createTxt();
+                    recordShare.setText("Stop Record");
+                    break;
+                case 0x06:
+                    recordShare.setText("Start Record");
+                    myFiles.close();
+                    break;
+                case 0x07:
+                    ToastUtil.showToastShort("Please connect the device!");
+                    break;
+                case 0x08:
+                    shareFile();
+                    break;
             }
             return false;
         }
     });
+
+    private Uri fpUri(String path) {
+        File file = new File(path);
+        if (file.exists() && file.length() > 0) {
+            return FileProvider.getUriForFile(this, getPackageName() + ".fileProvider", file);
+        }
+        return null;
+    }
+
+    private void shareFile() {
+        Uri uri = fpUri(myFiles.getFilePath());
+        if (uri != null) {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("application/octet-stream");
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[]{});
+            intent.putExtra(Intent.EXTRA_SUBJECT, "Data");
+            intent.putExtra(Intent.EXTRA_TEXT, "Content: ");
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            Intent chooser = Intent.createChooser(intent, "Share");
+            @SuppressLint("QueryPermissionsNeeded")
+            List<ResolveInfo> resInfoList = getPackageManager().queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY);
+            for (ResolveInfo resolveInfo : resInfoList) {
+                String packageName = resolveInfo.activityInfo.packageName;
+                grantUriPermission(packageName, uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+            launcher.launch(Intent.createChooser(chooser, "Share"));
+        } else {
+            ToastUtil.showToastShort("No Data");
+        }
+    }
 }

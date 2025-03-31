@@ -43,7 +43,7 @@ public class ParseRunnable implements Runnable {
 
         void deviceInfo(String name, String mac);
 
-        void value(int spo2, int pr, double pi, int rr, int wave, int packetFreq);
+        void value(int spo2, int rr, int pr, double pi, int resp, int wave, int packetFreq);
 
         void hardwareVersion(String v);
 
@@ -133,7 +133,7 @@ public class ParseRunnable implements Runnable {
         } else {
             pi = data[0] & 0x0F;
         }
-        mOnDataChangeListener.value(spo2, pr, pi, resp, wave, -1);
+        mOnDataChangeListener.value(spo2, 0, pr, pi, resp, wave, -1);
     }
 
     public void berryParse(int[] array) {
@@ -174,12 +174,12 @@ public class ParseRunnable implements Runnable {
             if (data.size() >= 19) {
                 int spo2 = data.get(4);
                 int pr = data.get(6);
-                int rr = data.get(8) + (data.get(9) << 8);
+                int rr = (data.get(8) + (data.get(9) << 8)) * 5; // 200Hz
                 double pi = data.get(10) / 10.0;
                 int wave = data.get(12);
                 int packetFreq = data.get(18);
 
-                mOnDataChangeListener.value(spo2, pr, pi, rr, wave, packetFreq);
+                mOnDataChangeListener.value(spo2, rr, pr, pi, 0, wave, packetFreq);
             }
             i += 20; // Move back one group
             validIndex = i;

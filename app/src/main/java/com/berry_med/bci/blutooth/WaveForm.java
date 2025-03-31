@@ -38,7 +38,7 @@ public class WaveForm extends SurfaceView {
 
     protected Paint mLinePaint;
     protected Path mLinePath;
-//    protected Path mFillPath;
+    //    protected Path mFillPath;
     protected Paint mFillPaint;
 
     protected Paint mClearPaint;
@@ -198,7 +198,7 @@ public class WaveForm extends SurfaceView {
         try {
             addAmplitude(0);
             mLinePath.reset();
-            mLinePath.moveTo(-50,0);
+            mLinePath.moveTo(-50, 0);
             index = 1;
             mRectIndex = 0;
             mDrawRect = new Rect(-150, 0, (mRectIndex + 1) * X_STEP, getHeight());
@@ -221,9 +221,7 @@ public class WaveForm extends SurfaceView {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         } finally {
-            if (canvas != null) {
-                getHolder().unlockCanvasAndPost(canvas);
-            }
+            if (canvas != null) getHolder().unlockCanvasAndPost(canvas);
         }
     }
 }

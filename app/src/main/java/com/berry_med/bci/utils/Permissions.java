@@ -20,6 +20,7 @@ import java.util.List;
 public class Permissions {
     public static void all(Activity activity, MyBluetooth ble, MyDialog dialog) {
         XXPermissions.with(activity)
+                .permission(Permission.WRITE_EXTERNAL_STORAGE)
                 .permission(Permission.ACCESS_FINE_LOCATION)
                 .permission(Permission.ACCESS_COARSE_LOCATION)
                 .permission(Permission.Group.BLUETOOTH)
@@ -27,6 +28,22 @@ public class Permissions {
                     @Override
                     public void onGranted(@NonNull List<String> permissions, boolean all) {
                         if (ble != null) ble.isOpen(dialog);
+                    }
+
+                    @Override
+                    public void onDenied(@NonNull List<String> permissions, boolean never) {
+                        if (never) XXPermissions.startPermissionActivity(activity, permissions);
+                    }
+                });
+    }
+
+    // Storage Permissions
+    public static void storage(Activity activity) {
+        XXPermissions.with(activity)
+                .permission(Permission.WRITE_EXTERNAL_STORAGE)
+                .request(new OnPermissionCallback() {
+                    @Override
+                    public void onGranted(@NonNull List<String> permissions, boolean all) {
                     }
 
                     @Override

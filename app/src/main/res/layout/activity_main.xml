@@ -467,7 +467,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="3dp"
                 android:layout_marginTop="1dp"
-                android:text="Resp Rate"
+                android:text="Resp"
                 android:textSize="13sp"
                 tools:ignore="HardcodedText" />
 
@@ -533,18 +533,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:text="Record and Share"
+            android:text="Record &amp; Share"
             android:textSize="13sp"
             tools:ignore="HardcodedText" />
 
-
         <Button
-            android:id="@+id/record_share"
+            android:id="@+id/share"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:text="Start Record"
+            android:text="Share"
+            android:textSize="13sp"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/start_record"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="5dp"
+            android:layout_toStartOf="@id/share"
+            android:text="Start"
             android:textSize="13sp"
             tools:ignore="HardcodedText" />
 

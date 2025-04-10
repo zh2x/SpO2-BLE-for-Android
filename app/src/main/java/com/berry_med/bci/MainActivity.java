@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ParseRunnable mParseRunnable;
     private MyFiles myFiles;
     private ActivityResultLauncher<Intent> launcher;
-    private Button recordShare;
+    private Button startRecord;
     private long startTime = 0;
 
     @Override
@@ -103,8 +103,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.confirm).setOnClickListener(this);
         findViewById(R.id.hwBtn).setOnClickListener(this);
         findViewById(R.id.swBtn).setOnClickListener(this);
-        recordShare = findViewById(R.id.record_share);
-        recordShare.setOnClickListener(this);
+        startRecord = findViewById(R.id.start_record);
+        startRecord.setOnClickListener(this);
+        findViewById(R.id.share).setOnClickListener(this);
 
         protocolRG.setOnCheckedChangeListener((group, id) -> {
             if (id == R.id.bci_radio) {
@@ -181,8 +182,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        startTime = System.currentTimeMillis();
         if (v.getId() == R.id.search) {
+            startTime = System.currentTimeMillis();
             Permissions.all(this, ble, dialog);
         } else if (v.getId() == R.id.confirm) {
             String n = inputDeviceName.getText().toString().trim();
@@ -196,19 +197,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ble.writeHex("0xFE");
         } else if (v.getId() == R.id.swBtn) {
             ble.writeHex("0xFF");
-        } else if (v.getId() == R.id.record_share) {
+        } else if (v.getId() == R.id.start_record) {
+            startTime = System.currentTimeMillis(); 
             Permissions.storage(this);
-            String name = recordShare.getText().toString().trim();
+            String name = startRecord.getText().toString().trim();
             if (ble.isConn()) {
-                if (name.contains("Start")) {
+                if (name.equals("Start")) {
                     mHandler.sendEmptyMessage(0x05);
                 } else {
                     mHandler.sendEmptyMessage(0x06);
-                    mHandler.sendEmptyMessageDelayed(0x08, 1000);
                 }
             } else {
                 mHandler.sendEmptyMessage(0x07);
             }
+        } else if (v.getId() == R.id.share) {
+            mHandler.sendEmptyMessageDelayed(0x08, 1000);
         }
     }
 
@@ -242,10 +245,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 case 0x05:
                     myFiles.createTxt();
-                    recordShare.setText("Stop Record");
+                    startRecord.setText("Stop");
                     break;
                 case 0x06:
-                    recordShare.setText("Start Record");
+                    startRecord.setText("Start");
                     myFiles.close();
                     break;
                 case 0x07:
